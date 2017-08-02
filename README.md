@@ -10,7 +10,7 @@ Compared with the pseudo-random number generators provided by the `Random` modul
 
 Two PRNGS are provided:
 * `Splitmix`, as described in the paper [_Fast Splittable Pseudorandom Number Generators_](http://gee.cs.oswego.edu/dl/papers/oopsla14.pdf) by Guy L. Steele Jr., Doug Lea, and Christine H. Flood, published in the proceedings of OOPSLA 2014.
-* `Chacha`, which is based on the [Chacha20 stream cipher](https://cr.yp.to/chacha.html) of D. J. Bernstein.  Splitting is implemented by "jumping", i.e. randomly generating a 128-bit initial counter for the new PRNG using the current PRNG.
+* `Chacha`, which is based on the [Chacha20 stream cipher](https://cr.yp.to/chacha.html) by D. J. Bernstein.  Splitting is implemented by "jumping", i.e. randomly generating a 128-bit initial state for the new PRNG using the current PRNG.
 
 Both PRNGs pass the [Dieharder](http://webhome.phy.duke.edu/~rgb/General/dieharder.php) statistical randomness test.
 
@@ -20,7 +20,9 @@ On 32-bit architectures, `Chacha` is the faster of the two, but is still twice a
 
 ## Installation and usage
 
-There are no external dependencies.  Just do `make` then become superuser if necessary and do `make install`.
+The only dependencies are a recent enough version of OCaml (4.04.0 or up) and the findlib/ocamlfind library manager.
+
+To build and install, just do `make` then become superuser if necessary and do `make install`.
 
 To use the library, use `ocamlfind` and select the `pringo` package, e.g.
 ```
@@ -31,5 +33,5 @@ Documentation is available as comments in the interface `PRNG.mli`.
 
 ## Copyright and license
 
-Copyright Inria  License LGPL v2 with special exception for static linking.
+Copyright Inria.  License LGPL v2 with special exception for static linking.
 
