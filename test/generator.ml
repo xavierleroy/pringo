@@ -14,24 +14,24 @@
 (* Testing PRNGs using the Dieharder statistical tests,
    http://webhome.phy.duke.edu/~rgb/General/dieharder.php *)
 
-open PRNG
+module R = PRNG.Chacha.State
 
 let seed = ref "Jamais un coup de dés n'abolira le hasard. -Mallarmé"
 
-let init () = State.seed !seed
+let init () = R.seed !seed
 
 let out8 g =
-  output_byte stdout (State.byte g)
+  output_byte stdout (R.byte g)
 
 let out32 g =
-  let n = State.bits32 g in
+  let n = R.bits32 g in
   output_byte stdout (Int32.to_int n);
   output_byte stdout (Int32.(to_int (shift_right_logical n 8)));
   output_byte stdout (Int32.(to_int (shift_right_logical n 16)));
   output_byte stdout (Int32.(to_int (shift_right_logical n 24)))
 
 let out64 g =
-  let n = State.bits64 g in
+  let n = R.bits64 g in
   output_byte stdout (Int64.to_int n);
   output_byte stdout (Int64.(to_int (shift_right_logical n 8)));
   output_byte stdout (Int64.(to_int (shift_right_logical n 16)));
@@ -62,7 +62,7 @@ let gen_blocks n =
   let g = init() in
   let b = Bytes.create n in
   while true do
-    State.bytes g b 0 n;
+    R.bytes g b 0 n;
     output stdout b 0 n
   done
 
@@ -71,7 +71,7 @@ let gen_blocks n =
 let treesplits n =
   let rec mkgens n g =
     if n <= 0 then [g] else begin
-      let g' = State.split g in
+      let g' = R.split g in
       mkgens (n-1) g @ mkgens (n-1) g'
     end in
   let gl = mkgens n (init()) in
@@ -82,7 +82,7 @@ let treesplits n =
 
 let laggedsplit n =
   let rec lag g =
-    let g' = State.split g in
+    let g' = R.split g in
     for _i = 1 to n do out32 g done;
     lag g'
   in lag (init())

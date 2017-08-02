@@ -13,7 +13,7 @@
 
 (** The stateful interface *)
 
-module State: sig
+module type STATE = sig
   type t
   val seed: string -> t
   val make: int array -> t
@@ -44,7 +44,7 @@ end
 
 (** The purely-functional, monadic interface *)
 
-module Pure: sig
+module type PURE = sig
   type t
   val seed: string -> t
   val make: int array -> t
@@ -68,3 +68,18 @@ module Pure: sig
 
   val split: t -> t * t
 end
+
+(** The Splitmix implementation *)
+
+module Splitmix: sig
+  module State: STATE
+  module Pure: PURE
+end
+
+(** The Chacha-20 implementation *)
+
+module Chacha: sig
+  module State: STATE
+  module Pure: PURE
+end
+

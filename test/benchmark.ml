@@ -16,6 +16,8 @@
 open Printf
 open PRNG
 
+let n = 50_000_000
+
 let time_fn msg fn =
   let start = Sys.time() in
   let res = fn() in
@@ -33,45 +35,64 @@ let repeat1 n fn arg () =
 let repeat2 n fn arg1 arg2 () =
   for i = 1 to n do ignore (fn arg1 arg2) done
 
+module BState(X: STATE) = struct
+
 let repeat_state0 n fn () =
-  let s = State.seed "xxx" in repeat1 n fn s ()
+  let s = X.seed "xxx" in repeat1 n fn s ()
 
 let repeat_state1 n fn arg () =
-  let s = State.seed "xxx" in repeat2 n fn s arg ()
+  let s = X.seed "xxx" in repeat2 n fn s arg ()
+
+let run() =
+  time_fn "bit" (repeat_state0 n X.bit);
+  time_fn "bits" (repeat_state0 n X.bits);
+  time_fn "int 0xFFEE" (repeat_state1 n X.int 0xFFEE);
+  time_fn "int32 0xFFEEDD" (repeat_state1 n X.int32 0xFFEEDDl);
+  time_fn "int64 0xFFEEDDCCAA" (repeat_state1 n X.int64 0xFFEEDDCCAAL);
+  time_fn "float 1.0" (repeat_state1 n X.float 1.0);
+  time_fn "split" (repeat_state0 n X.split);
+  time_fn "seed 8" (repeat1 n X.seed "01234567");
+  time_fn "seed 16 (/10)" (repeat1 (n/10) X.seed "0123456789ABCDEF");
+  time_fn "make 3" (repeat1 n X.make [|1234;5678;90909|])
+
+end
+
+module BPure(X: PURE) = struct
 
 let repeat_pure0 n fn () =
   let rec rep n p =
     if n <= 0 then () else (let (_, p') = fn p in rep (n-1) p')
-  in rep n (Pure.seed "xxx")
+  in rep n (X.seed "xxx")
 
 let repeat_pure1 n fn arg () =
   let rec rep n p =
     if n <= 0 then () else (let (_, p') = fn arg p in rep (n-1) p')
-  in rep n (Pure.seed "xxx")
+  in rep n (X.seed "xxx")
 
-let n = 50_000_000
+let run () =
+  time_fn "bit" (repeat_pure0 n X.bit);
+  time_fn "bits" (repeat_pure0 n X.bits);
+  time_fn "int 0xFFEE" (repeat_pure1 n X.int 0xFFEE);
+  time_fn "int32 0xFFEEDD" (repeat_pure1 n X.int32 0xFFEEDDl);
+  time_fn "int64 0xFFEEDDCCAA" (repeat_pure1 n X.int64 0xFFEEDDCCAAL);
+  time_fn "float 1.0" (repeat_pure1 n X.float 1.0);
+  time_fn "split" (repeat_pure0 n X.split)
+
+end
+
+module BSS = BState(Splitmix.State)   module BSP = BPure(Splitmix.Pure)
+module BCS = BState(Chacha.State)     module BCP = BPure(Chacha.Pure)
 
 let _ =
   printf "Times are in seconds for %d repetitions, unless indicated.\n" n;
-  printf "---- State interface ----\n";
-  time_fn "bit" (repeat_state0 n State.bit);
-  time_fn "bits" (repeat_state0 n State.bits);
-  time_fn "int 0xFFEE" (repeat_state1 n State.int 0xFFEE);
-  time_fn "int32 0xFFEEDD" (repeat_state1 n State.int32 0xFFEEDDl);
-  time_fn "int64 0xFFEEDDCCAA" (repeat_state1 n State.int64 0xFFEEDDCCAAL);
-  time_fn "float 1.0" (repeat_state1 n State.float 1.0);
-  time_fn "split" (repeat_state0 n State.split);
-  time_fn "seed 8" (repeat1 n State.seed "01234567");
-  time_fn "seed 16 (/10)" (repeat1 (n/10) State.seed "0123456789ABCDEF");
-  time_fn "make 3" (repeat1 n State.make [|1234;5678;90909|]);
-  printf "---- Pure interface ----\n";
-  time_fn "bit" (repeat_pure0 n Pure.bit);
-  time_fn "bits" (repeat_pure0 n Pure.bits);
-  time_fn "int 0xFFEE" (repeat_pure1 n Pure.int 0xFFEE);
-  time_fn "int32 0xFFEEDD" (repeat_pure1 n Pure.int32 0xFFEEDDl);
-  time_fn "int64 0xFFEEDDCCAA" (repeat_pure1 n Pure.int64 0xFFEEDDCCAAL);
-  time_fn "float 1.0" (repeat_pure1 n Pure.float 1.0);
-  time_fn "split" (repeat_pure0 n Pure.split);
+  printf "---- Splitmix, state interface ----\n";
+  BSS.run();
+  printf "---- Splitmix, pure interface ----\n";
+  BSP.run();
+  printf "---- Chacha, state interface ----\n";
+  BCS.run();
+  printf "---- Chacha, pure interface ----\n";
+  BCP.run();
   printf "---- OCaml's Random module ----\n";
   time_fn "bit" (repeat0 n Random.bool);
   time_fn "bits" (repeat0 n Random.bits);

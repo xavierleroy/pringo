@@ -16,6 +16,10 @@
 open Printf
 open PRNG
 
+module Checker(X: sig module State: STATE module Pure: PURE end) = struct
+
+open X
+
 (* This is a variant of the state monad that carries both a Pure PRNG
    (monadically) and a State PRNG (as an environment). *)
 
@@ -87,13 +91,22 @@ let full_checks_seed n seed =
 let full_checks_make n seed =
   tree_checks n (State.make seed) (Pure.make seed)
 
+end
+
+module ChkSplitmix = Checker(PRNG.Splitmix)
+module ChkChacha   = Checker(PRNG.Chacha)
+
 (* All together *)
 
 let _ =
-  printf "With seed...\n";
-  full_checks_seed 4 "Supercalifragiliciousexpialidolcius";
-  printf "With make...\n";
-  full_checks_make 4 [|314159; 2718|];
+  printf "Splitmix, with seed...\n";
+  ChkSplitmix.full_checks_seed 4 "Supercalifragiliciousexpialidolcius";
+  printf "Splitmix, with make...\n";
+  ChkSplitmix.full_checks_make 4 [|314159; 2718|];
+  printf "Chacha, with seed...\n";
+  ChkChacha.full_checks_seed 4 "Supercalifragiliciousexpialidolcius";
+  printf "Chacha, with make...\n";
+  ChkChacha.full_checks_make 4 [|314159; 2718|];
   printf "Test passed!\n"
 
 
