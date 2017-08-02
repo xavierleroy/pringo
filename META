@@ -1,0 +1,5 @@
+description = "Splittable pseudo-random number generators"
+requires = ""
+version = "1.0"
+archive(byte) = "PRNG.cma"
+archive(native) = "PRNG.cmxa"

@@ -1,0 +1,10 @@
+*~
+*.cm[ioxa]
+*.cmxa
+*.o
+*.a
+*.so
+*.obj
+*.lib
+*.dll
+*.exe

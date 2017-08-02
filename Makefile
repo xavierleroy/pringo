@@ -3,14 +3,16 @@ OCAMLC=ocamlc $(OCAMLFLAGS)
 OCAMLOPT=ocamlopt $(OCAMLFLAGS)
 OCAMLDEP=ocamldep
 OCAMLMKLIB=ocamlmklib
-
+OCAMLFIND=ocamlfind
 DIEHARDER=dieharder -g 200 -a
 ENT=head -c 1000000 | ent
 
+include $(shell $(OCAMLC) -where)/Makefile.config
+
 all: PRNG.cmxa PRNG.cma
 
-PRNG.cmxa PRNG.cma: PRNG.cmx PRNG.cmo stubs.o
-	$(OCAMLMKLIB) -o PRNG PRNG.cmo PRNG.cmx stubs.o
+PRNG.cmxa PRNG.cma: PRNG.cmx PRNG.cmo stubs.$(O)
+	$(OCAMLMKLIB) -o PRNG PRNG.cmo PRNG.cmx stubs.$(O)
 
 %.cmx: %.ml
 	$(OCAMLOPT) -c $*.ml
@@ -18,14 +20,22 @@ PRNG.cmxa PRNG.cma: PRNG.cmx PRNG.cmo stubs.o
 	$(OCAMLC) -c $*.ml
 %.cmi: %.mli
 	$(OCAMLOPT) -c $*.mli
-%.o: %.c
+%.$(O): %.c
 	$(OCAMLC) -c $*.c
 %.exe: %.ml PRNG.cmxa
 	$(OCAMLOPT) -I . -o $@ PRNG.cmxa $*.ml
 
 clean::
-	rm -f *.cm[ioxa] *.cmxa *.o *.a
-	rm -f test/*.cm[iox] test/*.o test/*.exe
+	rm -f *.cm[ioxa] *.cmxa *.$(O) *.$(A) *.$(SO)
+	rm -f test/*.cm[iox] test/*.$(O) test/*.exe
+
+TOINSTALL=PRNG.cmi PRNG.cma PRNG.cmxa PRNG.$(A) libPRNG.$(A) dllPRNG.$(SO)
+
+install:
+	$(OCAMLFIND) install pringo META $(TOINSTALL)
+
+uninstall:
+	$(OCAMLFIND) remove pringo
 
 testresults/dh-%.log: test/generator.exe testresults
 	./test/generator.exe -$(subst -, ,$*) | $(DIEHARDER) > $@
