@@ -2,17 +2,15 @@ OCAMLFLAGS=-g -safe-string
 OCAMLC=ocamlc $(OCAMLFLAGS)
 OCAMLOPT=ocamlopt $(OCAMLFLAGS)
 OCAMLDEP=ocamldep
+OCAMLMKLIB=ocamlmklib
 
 DIEHARDER=dieharder -g 200 -a
 ENT=head -c 1000000 | ent
 
 all: PRNG.cmxa PRNG.cma
 
-PRNG.cmxa: PRNG.cmx
-	$(OCAMLOPT) -a -o PRNG.cmxa PRNG.cmx
-
-PRNG.cma: PRNG.cmo
-	$(OCAMLC) -a -o PRNG.cma PRNG.cmo
+PRNG.cmxa PRNG.cma: PRNG.cmx PRNG.cmo stubs.o
+	$(OCAMLMKLIB) -o PRNG PRNG.cmo PRNG.cmx stubs.o
 
 %.cmx: %.ml
 	$(OCAMLOPT) -c $*.ml
@@ -20,8 +18,10 @@ PRNG.cma: PRNG.cmo
 	$(OCAMLC) -c $*.ml
 %.cmi: %.mli
 	$(OCAMLOPT) -c $*.mli
+%.o: %.c
+	$(OCAMLC) -c $*.c
 %.exe: %.ml PRNG.cmxa
-	$(OCAMLOPT) -o $@ PRNG.cmxa $*.ml
+	$(OCAMLOPT) -I . -o $@ PRNG.cmxa $*.ml
 
 clean::
 	rm -f *.cm[ioxa] *.cmxa *.o *.a

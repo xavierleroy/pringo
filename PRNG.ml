@@ -47,42 +47,16 @@ let ( ** ) = Int64.mul
 let (++) = Int64.add
 let (--) = Int64.sub
 
-(* Population count for int64 *)
+(* The core mixing functions.  Could be defined in OCaml, and would run
+  quite fast on 64-bit platforms, but are too slow on 32-bit platforms. *)
 
-let popcount64 w =
-  let w = w -- ((w >> 1) &&& 0x5555555555555555L) in
-  let w = (w &&& 0x3333333333333333L) ++ ((w >> 2) &&& 0x3333333333333333L) in
-  let w = (w ++ (w >> 4)) &&& 0x0f0f0f0f0f0f0f0fL in
-  Int64.(to_int ((w ** 0x0101010101010101L) >> 56))
-
-(* The core mixing functions *)
-
-let [@inline] mix64 z : int64 =
-  let z = (z ^^ (z >> 33)) ** 0xff51afd7ed558ccdL in
-  let z = (z ^^ (z >> 33)) ** 0xc4ceb9fe1a85ec53L in
-  z ^^ (z >> 33)
-
-let [@inline] mix32 z : int32 =
-  let z = (z ^^ (z >> 33)) ** 0xff51afd7ed558ccdL in
-  let z = (z ^^ (z >> 33)) ** 0xc4ceb9fe1a85ec53L in
-  Int64.to_int32 (z >> 32)
-
-let [@inline] mix30 z : int =
-  let z = (z ^^ (z >> 33)) ** 0xff51afd7ed558ccdL in
-  let z = (z ^^ (z >> 33)) ** 0xc4ceb9fe1a85ec53L in
-  Int64.to_int (z >> 34)
-
-let [@inline] mix64variant13 z : int64 =
-  let z = (z ^^ (z >> 30)) ** 0xbf58476d1ce4e5b9L in
-  let z = (z ^^ (z >> 27)) ** 0x94d049bb133111ebL in
-  z ^^ (z >> 31)
-
-let [@inline] mixGamma z : int64 =
-  let z = mix64variant13(z) ||| 1L in
-  if popcount64 (z ^^ (z >> 1)) >= 24
-  then z ^^ 0xaaaaaaaaaaaaaaaaL
-  else z
-  (* the result of mixGamma is always odd *)
+external mix64: int64 -> int64 = "pringo_mix64" "pringo_mix64_unboxed"
+  [@@unboxed] [@@noalloc]
+external mix32: int64 -> int32 = "pringo_mix32" "pringo_mix32_unboxed"
+  [@@unboxed] [@@noalloc]
+external mix30: int64 -> int = "pringo_mix30"
+external mixGamma: int64 -> int64 = "pringo_mixGamma" "pringo_mixGamma_unboxed"
+  [@@unboxed] [@@noalloc]
 
 (** Helpers for initialization *)
 
