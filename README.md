@@ -18,6 +18,10 @@ On 64-bit architectures, `Splitmix` is the faster of the two, and is even slight
 
 On 32-bit architectures, `Chacha` is the faster of the two, but is still twice as slow as OCaml's `Random` module.
 
+Splitmix has a 64-bit internal state, which is diversified by a 64-bit value called γ.  Splitting is achieved by changing both γ and the state, while other operations change only the state.  For a fixed γ, the period is 2<sup>64</sup>, but it is recommended to reseed after 2<sup>32</sup> numbers were generated.  From the initial seed, 64 bits worth of entropy are used.  Splitmix is not cryptographically strong: the internal state can be reconstructed from any two consecutive calls to `bits64`.  
+
+Chacha is the Chacha 20-round stream cipher encrypting a sequence of zeros.  The internal state is a 128-bit counter.  Splitting is achieved by generating a pseudo-random initial value for the counter of the new PRNG.  The period of the PRNG is unclear.  It is recommended to generate no more than 2<sup>64</sup> bytes before reseeding.  Up to 32 bytes (256 bits) of the seed are used as the Chacha-20 key, although 16 bytes (128 bits) are probably enough.  Chacha-20 has been extensively cryptanalyzed and is widely used as a stream cipher, hence the Chacha PRNG is cryptographically strong to the best of the current knowledge.
+
 ## Installation and usage
 
 The only dependencies are a recent enough version of OCaml (4.04.0 or up) and the findlib/ocamlfind library manager.

@@ -1,6 +1,6 @@
 (***********************************************************************)
 (*                                                                     *)
-(*                      The Cryptokit library                          *)
+(*                      The PRINGO library                             *)
 (*                                                                     *)
 (*            Xavier Leroy, projet Gallium, INRIA Paris                *)
 (*                                                                     *)
