@@ -74,7 +74,7 @@ static inline int popcount64(uint64_t x)
 CAMLprim uint64_t pringo_mixGamma_unboxed(uint64_t z)
 {
   z = mix64variant13(z) | 1ULL;
-  if (popcount64(z ^ (z >> 1)) >= 24) z ^= 0xaaaaaaaaaaaaaaaaULL;
+  if (popcount64(z ^ (z >> 1)) < 24) z ^= 0xaaaaaaaaaaaaaaaaULL;
   return z; 
 }
 
