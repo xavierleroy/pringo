@@ -30,6 +30,7 @@ module type STATE = sig
   val int32: t -> int32 -> int32
   val bits64: t -> int64
   val int64: t -> int64 -> int64
+  val nativebits: t -> nativeint
   val nativeint: t -> nativeint -> nativeint
   val char: t -> char
   val bytes: t -> bytes -> int -> int -> unit
@@ -58,6 +59,7 @@ module type PURE = sig
   val int32: int32 -> t -> int32 * t
   val bits64: t -> int64 * t
   val int64: int64 -> t -> int64 * t
+  val nativebits: t -> nativeint * t
   val nativeint: nativeint -> t -> nativeint * t
   val char: t -> char * t
   val split: t -> t * t
@@ -131,6 +133,11 @@ let int64 g bound =
   then invalid_arg (X.errorprefix ^ "int64")
   else int64aux g bound
 
+let nativebits =
+  if Nativeint.size = 32
+  then fun g -> Nativeint.of_int32 (X.bits32 g)
+  else fun g -> Int64.to_nativeint (X.bits64 g)
+
 let nativeint =
   if Nativeint.size = 32
   then fun g bound -> Nativeint.of_int32 (int32 g (Nativeint.to_int32 bound))
@@ -187,6 +194,11 @@ let int64 bound g =
   if bound <= 0L
   then invalid_arg (X.errorprefix ^ "int64")
   else int64aux bound g
+
+let nativebits =
+  if Nativeint.size = 32
+  then fun g -> let (r, g') = X.bits32 g in (Nativeint.of_int32 r, g')
+  else fun g -> let (r, g') = X.bits64 g in (Int64.to_nativeint r, g')
 
 let nativeint =
   if Nativeint.size = 32

@@ -105,6 +105,11 @@ module type STATE = sig
         [Int64.max_int] included, use
         [Int64.logand (bits64 g) Int64.max_int]. *)
 
+  val nativebits: t -> nativeint
+    (** [nativebits g] returns a platform-native integer (32 or 64
+        bits) evenly distributed between {!Nativeint.min_int} and
+        {!Nativeint.max_int}.  *)
+
   val nativeint: t -> nativeint -> nativeint
     (** [nativeint g n] returns a platform-native integer between
         0 included and [n] included.  [n] must be strictly positive. *)
@@ -189,6 +194,7 @@ module type PURE = sig
   val bits64: t -> int64 * t
   val int64: int64 -> t -> int64 * t
 
+  val nativebits: t -> nativeint * t
   val nativeint: nativeint -> t -> nativeint * t
 
   val char: t -> char * t
