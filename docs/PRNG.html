@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="PRNG" rel="Chapter" href="PRNG.html"><link title="The stateful interface" rel="Section" href="#2_Thestatefulinterface">
+<link title="The purely-functional, monadic interface" rel="Section" href="#2_Thepurelyfunctionalmonadicinterface">
+<link title="The Splitmix implementation" rel="Section" href="#2_TheSplitmiximplementation">
+<link title="The Chacha-20 implementation" rel="Section" href="#2_TheChacha20implementation">
+<title>PRNG</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_PRNG.html">PRNG</a></h1>
+
+<pre><span id="MODULEPRNG"><span class="keyword">module</span> PRNG</span>: <code class="code">sig</code> <a href="PRNG.html">..</a> <code class="code">end</code></pre><div class="info module top">
+<div class="info-desc">
+<p>This library provides pseudo-random number generators (PRNGs) comparable
+  to that of the Random module from OCaml's standard library, but with
+  two extensions:</p>
+<ul>
+<li>Generators are "splittable": they support a <code class="code">split</code> operation that
+  returns a new generator that is statistically independent from the
+  current generator.  Both generators can be used in parallel, and can
+  be further splitted, without introducing statistical bias.  This
+  splitting operation is particularly useful to implement the lazy
+  generation of pseudo-random infinite data structures such as
+  functions or streams.</li>
+<li>In addition to a stateful, imperative interface resembling that of
+  the <code class="code">Random.State</code> standard library module, another, purely
+  functional interface is provided.  In the functional interface, the
+  current state of the PRNG appears as parameter but also as result of
+  the number generation functions.  This interface can be used
+  directly within a state monad.</li>
+</ul>
+</div>
+</div>
+<hr width="100%">
+<h3 id="2_Thestatefulinterface">The stateful interface</h3>
+<pre><span id="MODULETYPESTATE"><span class="keyword">module type</span> <a href="PRNG.STATE.html">STATE</a></span> = <code class="code">sig</code> <a href="PRNG.STATE.html">..</a> <code class="code">end</code></pre><h3 id="2_Thepurelyfunctionalmonadicinterface">The purely-functional, monadic interface</h3><p>In this alternate interface, number-generating functions do not
+  update the current state of the generator in-place.  Instead, they
+  return the updated generator as a second result.  It is the
+  programmer's responsibility to correctly thread the generators
+  through the program, typically by using a state monad.</p>
+
+<p>All operations of the <code class="code">STATE</code> interface are provided except
+  <code class="code">bytes</code> (too imperative) and <code class="code">copy</code>, <code class="code">reseed</code> and <code class="code">remake</code> (pointless).</p>
+
+<pre><span id="MODULETYPEPURE"><span class="keyword">module type</span> <a href="PRNG.PURE.html">PURE</a></span> = <code class="code">sig</code> <a href="PRNG.PURE.html">..</a> <code class="code">end</code></pre><h3 id="2_TheSplitmiximplementation">The Splitmix implementation</h3>
+<pre><span id="MODULESplitmix"><span class="keyword">module</span> <a href="PRNG.Splitmix.html">Splitmix</a></span>: <code class="code">sig</code> <a href="PRNG.Splitmix.html">..</a> <code class="code">end</code></pre><div class="info">
+<p>This is an implementation of the <code class="code">STATE</code> and <code class="code">PURE</code> interfaces
+      based on the Splitmix design by Guy L.</p>
+
+</div>
+<h3 id="2_TheChacha20implementation">The Chacha-20 implementation</h3>
+<pre><span id="MODULEChacha"><span class="keyword">module</span> <a href="PRNG.Chacha.html">Chacha</a></span>: <code class="code">sig</code> <a href="PRNG.Chacha.html">..</a> <code class="code">end</code></pre><p>This is an implementation of the <code class="code">STATE</code> and <code class="code">PURE</code> interfaces
+      based on the Chacha 20 stream cipher by D. J. Bernstein.</p>
+
+<p>For seeding, 128 bits of entropy is recommended.  Seeds of up
+      to 32 characters are used as keys to the Chacha 20 cipher.
+      Characters beyond the first 32 are ignored.</p>
+
+<p>Reseeding is recommended after 2<sup class="superscript">64</sup> numbers have been generated.</p>
+</body></html>

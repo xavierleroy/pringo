@@ -70,6 +70,10 @@ consistencytest: test/consistency.exe
 benchmark: test/benchmark.exe
 	./test/benchmark.exe
 
+docs: *.mli
+	mkdir -p docs
+	ocamldoc -d docs/ -html *.mli
+
 depend:
 	$(OCAMLDEP) *.mli *.ml > .depend
 

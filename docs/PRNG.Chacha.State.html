@@ -1,0 +1,207 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="next" href="PRNG.Chacha.Pure.html">
+<link rel="Up" href="PRNG.Chacha.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="PRNG" rel="Chapter" href="PRNG.html"><link title="Creating and seeding PRNGs" rel="Section" href="#3_CreatingandseedingPRNGs">
+<link title="Generating pseudo-random data" rel="Section" href="#3_Generatingpseudorandomdata">
+<link title="Splitting and copying" rel="Section" href="#3_Splittingandcopying">
+<link title="Reseeding" rel="Section" href="#3_Reseeding">
+<title>PRNG.Chacha.State</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="PRNG.Chacha.html" title="PRNG.Chacha">Up</a>
+&nbsp;<a class="post" href="PRNG.Chacha.Pure.html" title="PRNG.Chacha.Pure">Next</a>
+</div>
+<h1>Module <a href="type_PRNG.Chacha.State.html">PRNG.Chacha.State</a></h1>
+
+<pre><span id="MODULEState"><span class="keyword">module</span> State</span>: <code class="type"><a href="PRNG.STATE.html">PRNG.STATE</a></code><code class="type"> </code></pre><hr width="100%">
+
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> </pre>
+<div class="info ">
+<div class="info-desc">
+<p>The type of generators</p>
+</div>
+</div>
+
+<h4 id="3_CreatingandseedingPRNGs">Creating and seeding PRNGs</h4>
+<pre><span id="VALseed"><span class="keyword">val</span> seed</span> : <code class="type">string -> <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p>Initialize a generator from the given seed.  The seed is given
+        as a character string.  The length and randomness of the seed
+        limit the total entropy of the generator.  For example, 64
+        bits of entropy can be obtained by giving a seed consisting of
+        8 cryptographically-strong random characters (as obtained
+        e.g. by reading <code class="code">/dev/random</code>.</p>
+</div>
+</div>
+
+<pre><span id="VALmake"><span class="keyword">val</span> make</span> : <code class="type">int array -> <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p>Initialize a generator from the given seed.  The seed is given
+        as an array of integers.</p>
+</div>
+</div>
+
+<pre><span id="VALmake_self_init"><span class="keyword">val</span> make_self_init</span> : <code class="type">unit -> <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p>Initialize a generator from a random seed obtained from the
+        operating system.  Tries hard to provide at least 
+        64 bits of entropy.  With high probability, successive calls
+        to <code class="code">make_self_init</code> return different PRNGs with different seeds.</p>
+</div>
+</div>
+<h4 id="3_Generatingpseudorandomdata">Generating pseudo-random data</h4>
+<pre><span id="VALbool"><span class="keyword">val</span> bool</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> bool</code></pre>
+<pre><span id="VALbit"><span class="keyword">val</span> bit</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<div class="info-desc">
+<p>Return a Boolean value in <code class="code">false,true</code> with 0.5 probability each.</p>
+</div>
+</div>
+
+<pre><span id="VALfloat"><span class="keyword">val</span> float</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> float -> float</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">float g x</code> returns a floating-point number evenly distributed
+        between 0.0 and <code class="code">x</code>.  If <code class="code">x</code> is negative, negative numbers 
+        between <code class="code">x</code> and 0.0 are returned.</p>
+</div>
+</div>
+
+<pre><span id="VALbyte"><span class="keyword">val</span> byte</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int</code></pre>
+<pre><span id="VALbits8"><span class="keyword">val</span> bits8</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int</code></pre><div class="info ">
+<div class="info-desc">
+<p>Return an 8-bit integer evenly distributed between 0 and 255.</p>
+</div>
+</div>
+
+<pre><span id="VALbits"><span class="keyword">val</span> bits</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int</code></pre>
+<pre><span id="VALbits30"><span class="keyword">val</span> bits30</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int</code></pre><div class="info ">
+<div class="info-desc">
+<p>Return a 30-bit integer evenly distributed between 0 and 2<sup class="superscript">30</sup>-1
+        (that is, 1073741823, or 0x3FFFFFFF).</p>
+</div>
+</div>
+
+<pre><span id="VALint"><span class="keyword">val</span> int</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int -> int</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">int g n</code> returns an integer evenly distributed between 0 included
+        and <code class="code">n</code> excluded.  Hence there are <code class="code">n</code> possible return values
+        with probability <code class="code">1/n</code> each.  <code class="code">n</code> must be greater than 0 and
+        no greater than 2<sup class="superscript">30</sup>-1.</p>
+</div>
+</div>
+
+<pre><span id="VALbits32"><span class="keyword">val</span> bits32</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int32</code></pre><div class="info ">
+<div class="info-desc">
+<p>Return a 32-bit integer evenly distributed between
+        <code class="code">Stdlib.Int32.min_int</code> and <code class="code">Stdlib.Int32.max_int</code>.</p>
+</div>
+</div>
+
+<pre><span id="VALint32"><span class="keyword">val</span> int32</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int32 -> int32</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">int32 g n</code> returns a 32-bit integer evenly distributed between
+        0 included and <code class="code">n</code> excluded.  <code class="code">n</code> must be strictly positive.</p>
+
+<p>Note that <code class="code">int32 Int32.max_int</code> produces numbers between 0 and
+        <code class="code">Int32.max_int</code> excluded.  To produce numbers between 0 and
+        <code class="code">Int32.max_int</code> included, use
+        <code class="code">Int32.logand (bits32 g) Int64.max_int</code>.</p>
+</div>
+</div>
+
+<pre><span id="VALbits64"><span class="keyword">val</span> bits64</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int64</code></pre><div class="info ">
+<div class="info-desc">
+<p>Return a 64-bit integer evenly distributed between
+        <code class="code">Stdlib.Int64.min_int</code> and <code class="code">Stdlib.Int64.max_int</code>.</p>
+</div>
+</div>
+
+<pre><span id="VALint64"><span class="keyword">val</span> int64</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int64 -> int64</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">int64 g n</code> returns a 64-bit integer evenly distributed between
+        0 included and <code class="code">n</code> excluded.  <code class="code">n</code> must be strictly positive.</p>
+
+<p>Note that <code class="code">int64 Int64.max_int</code> produces numbers between 0 and
+        <code class="code">Int64.max_int</code> excluded.  To produce numbers between 0 and
+        <code class="code">Int64.max_int</code> included, use
+        <code class="code">Int64.logand (bits64 g) Int64.max_int</code>.</p>
+</div>
+</div>
+
+<pre><span id="VALnativebits"><span class="keyword">val</span> nativebits</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> nativeint</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">nativebits g</code> returns a platform-native integer (32 or 64
+        bits) evenly distributed between <code class="code">Stdlib.Nativeint.min_int</code> and
+        <code class="code">Stdlib.Nativeint.max_int</code>.</p>
+</div>
+</div>
+
+<pre><span id="VALnativeint"><span class="keyword">val</span> nativeint</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> nativeint -> nativeint</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">nativeint g n</code> returns a platform-native integer between
+        0 included and <code class="code">n</code> included.  <code class="code">n</code> must be strictly positive.</p>
+</div>
+</div>
+
+<pre><span id="VALchar"><span class="keyword">val</span> char</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> char</code></pre><div class="info ">
+<div class="info-desc">
+<p>Return a character evenly distributed among <code class="code">'\000' ... '\255'</code>.</p>
+</div>
+</div>
+
+<pre><span id="VALbytes"><span class="keyword">val</span> bytes</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> bytes -> int -> int -> unit</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">bytes g b ofs len</code> produces <code class="code">len</code> bytes of pseudo-random data
+      and stores them in byte sequence <code class="code">b</code> at offsets <code class="code">ofs</code> to <code class="code">ofs+len-1</code>.</p>
+
+<p>Raise <code class="code">Invalid_argument</code> if <code class="code">len &lt; 0</code> or <code class="code">ofs</code> and <code class="code">len</code> do not
+      designate a valid range of <code class="code">b</code>.</p>
+</div>
+</div>
+<h4 id="3_Splittingandcopying">Splitting and copying</h4>
+<pre><span id="VALsplit"><span class="keyword">val</span> split</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">split g</code> returns a fresh generator <code class="code">g'</code> that is statistically
+        independent from the current generator <code class="code">g</code>.  The two generators
+        <code class="code">g</code> and <code class="code">g'</code> can be used in parallel and will produce independent
+        pseudo-random data.  Each generator <code class="code">g</code> and <code class="code">g'</code> can be splitted
+        again in the future.</p>
+</div>
+</div>
+
+<pre><span id="VALcopy"><span class="keyword">val</span> copy</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">copy g</code> returns a generator <code class="code">g'</code> that has the same state as <code class="code">g</code>.
+        The two generators <code class="code">g</code> and <code class="code">g'</code> produce the same data.</p>
+</div>
+</div>
+<h4 id="3_Reseeding">Reseeding</h4>
+<pre><span id="VALreseed"><span class="keyword">val</span> reseed</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> string -> unit</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">reseed g s</code> reinitializes the generator <code class="code">g</code> with fresh seed data
+        from string <code class="code">s</code>.  This is like <code class="code">seed s</code> except that the existing
+        generator <code class="code">g</code> is seeded, instead of a new generator being returned.
+        It is good practice to reseed a PRNG after a certain quantity
+        of pseudo-random data has been produced from it: typically
+        2<sup class="superscript">32</sup> numbers for the <a href="PRNG.Splitmix.html"><code class="code">PRNG.Splitmix</code></a> generator and
+        2<sup class="superscript">64</sup> bytes for then <a href="PRNG.Chacha.html"><code class="code">PRNG.Chacha</code></a> generator.</p>
+</div>
+</div>
+
+<pre><span id="VALremake"><span class="keyword">val</span> remake</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int array -> unit</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">remake g a</code> reinitializes the generator <code class="code">g</code> with fresh seed data
+        from array <code class="code">a</code>.  This is like <code class="code">reseed</code> except that the seed is
+        given as an array of integers.</p>
+</div>
+</div>
+</body></html>

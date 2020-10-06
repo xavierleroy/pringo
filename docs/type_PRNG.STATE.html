@@ -1,0 +1,38 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="PRNG" rel="Chapter" href="PRNG.html"><title>PRNG.STATE</title>
+</head>
+<body>
+<code class="code"><span class="keyword">sig</span><br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;seed&nbsp;:&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;make&nbsp;:&nbsp;int&nbsp;array&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;make_self_init&nbsp;:&nbsp;unit&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;bool&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;bool<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;bit&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;bool<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;float&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;float&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;float<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;byte&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;bits8&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;bits&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;bits30&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;int&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;bits32&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int32<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;int32&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int32&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int32<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;bits64&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int64<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;int64&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int64&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int64<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;nativebits&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;nativeint<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;nativeint&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;nativeint&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;nativeint<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;char&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;char<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;bytes&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;bytes&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;split&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;copy&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;reseed&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;remake&nbsp;:&nbsp;<span class="constructor">PRNG</span>.<span class="constructor">STATE</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;array&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+<span class="keyword">end</span></code></body></html>

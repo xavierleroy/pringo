@@ -1,0 +1,59 @@
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="PRNG" rel="Chapter" href="PRNG.html"><title>Index of modules</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Index of modules</h1>
+<table>
+<tr><td align="left"><div>C</div></td></tr>
+<tr><td><a href="PRNG.Chacha.html">Chacha</a> [<a href="PRNG.html">PRNG</a>]</td>
+<td></td></tr>
+<tr><td align="left"><div>P</div></td></tr>
+<tr><td><a href="PRNG.html">PRNG</a> </td>
+<td><div class="info">
+<p>This library provides pseudo-random number generators (PRNGs) comparable
+  to that of the Random module from OCaml's standard library, but with
+  two extensions: Generators are "splittable": they support a <code class="code">split</code> operation that
+  returns a new generator that is statistically independent from the
+  current generator.  Both generators can be used in parallel, and can
+  be further splitted, without introducing statistical bias.  This
+  splitting operation is particularly useful to implement the lazy
+  generation of pseudo-random infinite data structures such as
+  functions or streams., In addition to a stateful, imperative interface resembling that of
+  the <code class="code">Random.State</code> standard library module, another, purely
+  functional interface is provided.  In the functional interface, the
+  current state of the PRNG appears as parameter but also as result of
+  the number generation functions.  This interface can be used
+  directly within a state monad.</p>
+
+</div>
+</td></tr>
+<tr><td><a href="PRNG.Chacha.Pure.html">Pure</a> [<a href="PRNG.Chacha.html">PRNG.Chacha</a>]</td>
+<td></td></tr>
+<tr><td><a href="PRNG.Splitmix.Pure.html">Pure</a> [<a href="PRNG.Splitmix.html">PRNG.Splitmix</a>]</td>
+<td></td></tr>
+<tr><td align="left"><div>S</div></td></tr>
+<tr><td><a href="PRNG.Splitmix.html">Splitmix</a> [<a href="PRNG.html">PRNG</a>]</td>
+<td><div class="info">
+<p>This is an implementation of the <code class="code">STATE</code> and <code class="code">PURE</code> interfaces
+      based on the Splitmix design by Guy L.</p>
+
+</div>
+</td></tr>
+<tr><td><a href="PRNG.Chacha.State.html">State</a> [<a href="PRNG.Chacha.html">PRNG.Chacha</a>]</td>
+<td></td></tr>
+<tr><td><a href="PRNG.Splitmix.State.html">State</a> [<a href="PRNG.Splitmix.html">PRNG.Splitmix</a>]</td>
+<td></td></tr>
+</table>
+</body>
+</html>

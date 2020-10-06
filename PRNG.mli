@@ -80,8 +80,8 @@ module type STATE = sig
         no greater than 2{^30}-1. *)
 
   val bits32: t -> int32
-    (** Return a 32-bit integer evenly distributed between {!Int32.min_int}
-        and {!Int32.max_int}.  *)
+    (** Return a 32-bit integer evenly distributed between
+        {Int32.min_int} and {Int32.max_int}.  *)
 
   val int32: t -> int32 -> int32
     (** [int32 g n] returns a 32-bit integer evenly distributed between
@@ -93,8 +93,8 @@ module type STATE = sig
         [Int32.logand (bits32 g) Int64.max_int]. *)
 
   val bits64: t -> int64
-    (** Return a 64-bit integer evenly distributed between {!Int64.min_int}
-        and {!Int64.max_int}.  *)
+    (** Return a 64-bit integer evenly distributed between
+        {Int64.min_int} and {Int64.max_int}.  *)
 
   val int64: t -> int64 -> int64
     (** [int64 g n] returns a 64-bit integer evenly distributed between
@@ -107,8 +107,8 @@ module type STATE = sig
 
   val nativebits: t -> nativeint
     (** [nativebits g] returns a platform-native integer (32 or 64
-        bits) evenly distributed between {!Nativeint.min_int} and
-        {!Nativeint.max_int}.  *)
+        bits) evenly distributed between {Nativeint.min_int} and
+        {Nativeint.max_int}.  *)
 
   val nativeint: t -> nativeint -> nativeint
     (** [nativeint g n] returns a platform-native integer between
@@ -154,7 +154,7 @@ module type STATE = sig
 
 end
 
-(** {2} The purely-functional, monadic interface *)
+(** {2 The purely-functional, monadic interface} *)
 
 (** In this alternate interface, number-generating functions do not
   update the current state of the generator in-place.  Instead, they
