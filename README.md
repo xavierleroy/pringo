@@ -33,9 +33,9 @@ To use the library, use `ocamlfind` and select the `pringo` package, e.g.
         ocamlfind opt -linkpkg -package pringo
 ```
 
-Documentation is available as comments in the interface `PRNG.mli`.
+Documentation is available [online](https://xavierleroy.org/pringo/PRNG.html)
+and as comments in the interface `PRNG.mli`.
 
 ## Copyright and license
 
 Copyright Inria.  License LGPL v2 with special exception for static linking.
-
