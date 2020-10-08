@@ -5,7 +5,7 @@
 This small library provides several pseudo-random number generators.  From a hopefully truly random seed provided by the user or obtained from the system, those generators provide infinite streams of numbers whose statistical properties resemble the properties of streams of random numbers. 
 
 Compared with the pseudo-random number generators provided by the `Random` module from the OCaml standard library, the PRINGO generators have two extra features:
-* They are **splittable**: they support a `split` operation that returns a new generator that is statistically independent from the current generator.  Both generators can be used in parallel, and can be further splitted, without introducing statistical bias.  This splitting operation is particularly useful to implement the lazy generation of pseudo-random infinite data structures such as functions or streams.
+* They are **splittable**: they support a `split` operation that returns a new generator that is statistically independent from the current generator.  Both generators can be used in parallel, and can be split further, without introducing statistical bias.  This splitting operation is particularly useful to implement the lazy generation of pseudo-random infinite data structures such as functions or streams.
 * In addition to a stateful, imperative interface resembling that of the `Random.State` standard library module, another, **purely functional interface** is provided.  In the functional interface, the current state of the PRNG appears as parameter but also as result of the number generation functions.  This interface can be used directly within a state monad.
 
 Two PRNGS are provided:
