@@ -53,7 +53,7 @@ let run() =
   time_fn "split" (repeat_state0 n X.split);
   time_fn "seed 8" (repeat1 n X.seed "01234567");
   time_fn "seed 16 (/10)" (repeat1 (n/10) X.seed "0123456789ABCDEF");
-  time_fn "make 3" (repeat1 n X.make [|1234;5678;90909|])
+  time_fn "make 3 (/10)" (repeat1 (n/10) X.make [|1234;5678;90909|])
 
 end
 
