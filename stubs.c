@@ -202,7 +202,7 @@ static void chacha20_block(const struct chacha20_key * k,
   x13 = s->ctr[1];
   x14 = s->nonce[0];
   x15 = s->nonce[1];
-  for (i = 10; i > 0; i --) {
+  for (i = 8; i > 0; i -= 2) {
     QUARTERROUND( x0, x4, x8,x12)
     QUARTERROUND( x1, x5, x9,x13)
     QUARTERROUND( x2, x6,x10,x14)
