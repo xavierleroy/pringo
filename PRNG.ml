@@ -143,8 +143,14 @@ let nativeint =
   then fun g bound -> Nativeint.of_int32 (int32 g (Nativeint.to_int32 bound))
   else fun g bound -> Int64.to_nativeint (int64 g (Int64.of_nativeint bound))
 
-let float g bound =
-  (Int64.(to_float (shift_right_logical (X.bits64 g) 11)) *. 0x1.p-53) *. bound
+let float_64 g bound =
+  let b = X.bits64 g in
+  (Int64.(to_float (shift_right_logical b 11)) *. 0x1.p-53) *. bound
+
+let float_32 g bound =
+  let a = X.bits30 g in
+  let b = X.bits30 g in
+  (float a *. 0x1.p-60 +. float b *. 0x1.p-30) *. bound
 
 end
 
@@ -212,9 +218,14 @@ let nativeint =
       (Int64.to_nativeint r, g')
   end
 
-let float bound g =
-  let (b, g') = X.bits64 g in
-  ((Int64.(to_float (shift_right_logical b 11)) *. 0x1.p-53) *. bound, g')
+let float_64 bound g =
+  let (b, g) = X.bits64 g in
+  ((Int64.(to_float (shift_right_logical b 11)) *. 0x1.p-53) *. bound, g)
+
+let float_32 bound g =
+  let (a, g) = X.bits30 g in
+  let (b, g) = X.bits30 g in
+  ((float a *. 0x1.p-60 +. float b *. 0x1.p-30) *. bound, g)
 
 end
 
@@ -305,6 +316,8 @@ include StateDerived(struct
   let errorprefix = "PRNG.Splitmix.State."
 end)
 
+let float = float_64
+
 let bytes g dst ofs len =
   if ofs < 0 || len < 0 || ofs > Bytes.length dst - len then
     invalid_arg "PRNG.State.bytes"
@@ -387,6 +400,8 @@ include PureDerived(struct
   let errorprefix = "PRNG.Splitmix.Pure."
 end)
 
+let float = float_64
+
 let split g =
   let g1 = next g in
   let g2 = next g1 in
@@ -432,15 +447,22 @@ let [@inline] make32 b0 b1 b2 b3 =
              (add (shift_left (of_int b2) 16)
                   (shift_left (of_int b3) 24)))
 
-let [@inline] make64 b0 b1 b2 b3 b4 b5 b6 b7 =
-  Int64.(add (add (add (of_int b0)
-                       (shift_left (of_int b1) 8))
-                  (add (shift_left (of_int b2) 16)
-                       (shift_left (of_int b3) 24)))
-             (add (add (shift_left (of_int b4) 32)
-                       (shift_left (of_int b5) 40))
-                  (add (shift_left (of_int b6) 48)
-                       (shift_left (of_int b7) 56))))
+let make64 =
+  if Sys.word_size = 64
+  then (fun b0 b1 b2 b3 b4 b5 b6 b7 ->
+             Int64.(add (add (add (of_int b0)
+                                  (shift_left (of_int b1) 8))
+                             (add (shift_left (of_int b2) 16)
+                                  (shift_left (of_int b3) 24)))
+                        (add (add (shift_left (of_int b4) 32)
+                                  (shift_left (of_int b5) 40))
+                             (add (shift_left (of_int b6) 48)
+                                  (shift_left (of_int b7) 56)))))
+       [@inline]
+  else (fun b0 b1 b2 b3 b4 b5 b6 b7 ->
+             Int64.(add (of_int32 (make32 b0 b1 b2 b3))
+                        (shift_left (of_int32 (make32 b4 b5 b6 b7)) 32)))
+       [@inline]
 
 (** The stateful interface *)
 
@@ -530,6 +552,8 @@ include StateDerived(struct
   let bits64 = bits64
   let errorprefix = "PRNG.Chacha.State."
 end)
+
+let float = if Sys.word_size = 64 then float_64 else float_32
 
 let bytes g dst ofs len =
   if ofs < 0 || len < 0 || Bytes.length dst - len > ofs then
@@ -650,6 +674,8 @@ include PureDerived(struct
   let bits64 = bits64
   let errorprefix = "PRNG.Chacha.Pure."
 end)
+
+let float = if Sys.word_size = 64 then float_64 else float_32
 
 let bytes g dst ofs len =
   if ofs < 0 || len < 0 || Bytes.length dst - len > ofs then
