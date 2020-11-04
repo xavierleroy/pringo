@@ -535,14 +535,13 @@ let bytes g dst ofs len =
   if ofs < 0 || len < 0 || Bytes.length dst - len > ofs then
     invalid_arg "PRNG.Chacha.State.bytes";
   let rec fill ofs len =
-    let i = g.next in
-    let avail = 64 - i in
+    let next = g.next in
+    let avail = 64 - next in
     if len <= avail then begin
-      Bytes.blit g.st i dst ofs len;
-      g.next <- i + len;
+      Bytes.blit g.st next dst ofs len;
+      g.next <- next + len;
     end else begin
-      let avail = 64 - i in
-      Bytes.blit g.st avail dst ofs len;
+      Bytes.blit g.st next dst ofs avail;
       chacha_transform g.key g.st;
       g.next <- 0;
       fill (ofs + avail) (len - avail)
@@ -656,14 +655,13 @@ let bytes g dst ofs len =
   if ofs < 0 || len < 0 || Bytes.length dst - len > ofs then
     invalid_arg "PRNG.Chacha.Pure.bytes";
   let rec fill g ofs len =
-    let i = g.next in
-    let avail = 64 - i in
+    let next = g.next in
+    let avail = 64 - next in
     if len <= avail then begin
-      Bytes.blit g.st i dst ofs len;
-      {g with next = i + len}
+      Bytes.blit g.st next dst ofs len;
+      {g with next = next + len}
     end else begin
-      let avail = 64 - i in
-      Bytes.blit g.st avail dst ofs len;
+      Bytes.blit g.st next dst ofs avail;
       let st' = Bytes.copy g.st in
       chacha_transform g.key st';
       fill {g with st = st'; next = 0} (ofs + avail) (len - avail)
