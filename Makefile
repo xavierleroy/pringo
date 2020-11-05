@@ -38,10 +38,10 @@ uninstall:
 	$(OCAMLFIND) remove pringo
 
 testresults/dh-%.log: test/generator.exe testresults
-	./test/generator.exe -$(subst -, ,$*) | $(DIEHARDER) > $@
+	./test/generator.exe $* | $(DIEHARDER) > $@
 
 testresults/ent-%.log: test/generator.exe testresults
-	./test/generator.exe -$(subst -, ,$*) | $(ENT) > $@
+	./test/generator.exe $* | $(ENT) > $@
 
 clean::
 	rm -rf testresults
@@ -49,9 +49,11 @@ clean::
 testresults:
 	mkdir testresults
 
-ALLTESTS=seq8 seq32 seq64 block-13 \
+TESTS=seq8 seq32 seq64 block-13 \
   treesplit-1 treesplit-2 treesplit-4 \
   laggedsplit-1 laggedsplit-3 laggedsplit-10
+
+ALLTESTS=$(TESTS:%=splitmix-%) $(TESTS:%=chacha-%)
 
 SMALLTESTS=$(ALLTESTS:%=testresults/ent-%.log)
 

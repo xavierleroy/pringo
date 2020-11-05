@@ -14,9 +14,9 @@
 (* Testing PRNGs using the Dieharder statistical tests,
    http://webhome.phy.duke.edu/~rgb/General/dieharder.php *)
 
-module R = PRNG.Chacha.State
-
 let seed = ref "Jamais un coup de dés n'abolira le hasard. -Mallarmé"
+
+module Maketest (R: PRNG.STATE) = struct
 
 let init () = R.seed !seed
 
@@ -87,8 +87,41 @@ let laggedsplit n =
     lag g'
   in lag (init())
 
+end
+
+module T1 = Maketest(PRNG.Splitmix.State)
+module T2 = Maketest(PRNG.Chacha.State)
+
+let chacha = ref false
+
+let gen_bytes () = if !chacha then T2.gen_bytes() else T1.gen_bytes()
+let gen_int32 () = if !chacha then T2.gen_int32() else T1.gen_int32()
+let gen_int64 () = if !chacha then T2.gen_int64() else T1.gen_int64()
+let gen_blocks n = if !chacha then T2.gen_blocks n else T1.gen_blocks n
+let treesplits n = if !chacha then T2.treesplits n else T1.treesplits n
+let laggedsplit n = if !chacha then T2.laggedsplit n else T1.laggedsplit n
+
+let run_config s =
+  let l =
+    match String.split_on_char '-' s with
+    | "splitmix" :: l -> chacha := false; l
+    | "chacha" :: l -> chacha := true; l
+    | _ -> raise (Arg.Bad ("unknown configuration " ^ s)) in
+  match l with
+  | ["seq8"] -> gen_bytes()
+  | ["seq32"] -> gen_int32()
+  | ["seq64"] -> gen_int64()
+  | ["block"; n] -> gen_blocks (int_of_string n)
+  | ["treesplit"; n] -> treesplits (int_of_string n)
+  | ["laggedsplit"; n] -> laggedsplit (int_of_string n)
+  | _ -> raise (Arg.Bad ("unknown configuration " ^ s))
+
 let _ =
   Arg.(parse [
+    "-splitmix", Clear chacha,
+      " Test the Splitmix implementation";
+    "-chacha", Set chacha,
+      " Test the Chacha implementation";
     "-seed", Set_string seed,
       " <seed>  Choose a seed";
     "-seq8", Unit gen_bytes,
@@ -104,6 +137,6 @@ let _ =
     "-laggedsplit", Int laggedsplit,
       " <n>  Split, produce n 32-bit numbers, then use the split"
   ]
-  (fun _ -> raise (Arg.Bad "Please select an option"))
-  "Usage: ./testDH <options> | dieharder -a -g 200.\nOptions are:")
+  run_config
+  "Usage: ./generator <options> [config] | dieharder -a -g 200.\nOptions are:")
 
