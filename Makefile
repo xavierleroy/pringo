@@ -50,8 +50,7 @@ testresults:
 	mkdir testresults
 
 TESTS=seq8 seq32 seq64 block-13 \
-  treesplit-1 treesplit-2 treesplit-4 \
-  laggedsplit-1 laggedsplit-3 laggedsplit-10
+  treesplit-1 treesplit-4 laggedsplit-3 laggedsplit-10
 
 ALLTESTS=$(TESTS:%=splitmix-%) $(TESTS:%=chacha-%)
 
