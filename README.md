@@ -10,7 +10,7 @@ Compared with the pseudo-random number generators provided by the `Random` modul
 
 Two PRNGS are provided:
 * `Splitmix`, as described in the paper [_Fast Splittable Pseudorandom Number Generators_](http://gee.cs.oswego.edu/dl/papers/oopsla14.pdf) by Guy L. Steele Jr., Doug Lea, and Christine H. Flood, published in the proceedings of OOPSLA 2014.
-* `Chacha`, which is based on the [Chacha20 stream cipher](https://cr.yp.to/chacha.html) by D. J. Bernstein. Splitting is implemented by "jumping", i.e. randomly generating a 128-bit initial state for the new PRNG using the current PRNG.
+* `Chacha`, which is based on the [Chacha stream cipher](https://cr.yp.to/chacha.html) by D. J. Bernstein. Splitting is implemented by "jumping", i.e. randomly generating a 128-bit initial state for the new PRNG using the current PRNG.
 
 Both PRNGs pass the [Dieharder](http://webhome.phy.duke.edu/~rgb/General/dieharder.php) statistical randomness test.
 
@@ -20,7 +20,7 @@ On 32-bit architectures, `Chacha` is the faster of the two, a bit slower than OC
 
 Splitmix has a 64-bit internal state, which is diversified by a 64-bit value called γ.  Splitting is achieved by changing both γ and the state, while other operations change only the state.  For a fixed γ, the period is 2<sup>64</sup>, but it is recommended to reseed after 2<sup>32</sup> numbers were generated.  From the initial seed, 64 bits worth of entropy are used.  Splitmix is not cryptographically strong: the internal state can be reconstructed from any two consecutive calls to `bits64`.  
 
-Chacha is the Chacha 20-round stream cipher, reduced to 8 rounds, encrypting a sequence of zeros.  The internal state is a 128-bit counter.  Splitting is achieved by generating a pseudo-random initial value for the counter of the new PRNG.  The period of the PRNG is unclear.  It is recommended to generate no more than 2<sup>64</sup> bytes before reseeding.  Up to 32 bytes (256 bits) of the seed are used as the Chacha-20 key, although 16 bytes (128 bits) are probably enough.  The PRNG is probably cryptographically strong, even though it uses the 8-round variant of Chacha-20, which has a lower security margin than the 20-round variant widely used as a stream cipher.
+Chacha is the 8-round Chacha stream cipher encrypting a sequence of zeros.  The internal state is a 128-bit counter.  Splitting is achieved by generating a pseudo-random initial value for the counter of the new PRNG.  The period of the PRNG is unclear.  It is recommended to generate no more than 2<sup>64</sup> bytes before reseeding.  Up to 32 bytes (256 bits) of the seed are used as the Chacha key, although 16 bytes (128 bits) are probably enough.  The PRNG is probably cryptographically strong, even though it uses the 8-round variant of Chacha, which has a lower security margin than the 20-round variant widely used as a stream cipher.
 
 ## Installation and usage
 
