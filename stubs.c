@@ -272,3 +272,110 @@ static void chacha20_init_key(struct chacha20_key * k,
   k->key[10] = U8TO32_LITTLE(key + 8);
   k->key[11] = U8TO32_LITTLE(key + 12);
 }
+
+/* Primitives for Xoshiro256++ */
+
+struct xoshiro {
+  uint64_t s[4];
+};
+
+#define Xoshiro_val(v) ((struct xoshiro *) Data_abstract_val(v))
+
+static inline uint64_t rotl(const uint64_t x, int k) {
+  return (x << k) | (x >> (64 - k));
+}
+
+static inline uint64_t next(uint64_t s[4])
+{
+  const uint64_t result = rotl(s[0] + s[3], 23) + s[0];
+  const uint64_t t = s[1] << 17;
+  s[2] ^= s[0];
+  s[3] ^= s[1];
+  s[1] ^= s[2];
+  s[0] ^= s[3];
+  s[2] ^= t;
+  s[3] = rotl(s[3], 45);
+  return result;
+}
+
+CAMLprim int64_t pringo_xoshiro_next_unboxed(value vstate)
+{
+  return next(Xoshiro_val(vstate)->s);
+}
+
+CAMLprim value pringo_xoshiro_next(value vstate)
+{
+  return caml_copy_int64(next(Xoshiro_val(vstate)->s));
+}
+
+CAMLprim value pringo_xoshiro_jump(value vstate)
+{
+  static const uint64_t JUMP[] = { 
+    0x180ec6d33cfd0aba, 0xd5a61266f0c9392c,
+    0xa9582618e03fc9aa, 0x39abdc4529b1661c
+  };
+  uint64_t * s = Xoshiro_val(vstate)->s;
+  uint64_t s0 = 0;
+  uint64_t s1 = 0;
+  uint64_t s2 = 0;
+  uint64_t s3 = 0;
+  for(int i = 0; i < sizeof JUMP / sizeof *JUMP; i++) {
+    for(int b = 0; b < 64; b++) {
+      if (JUMP[i] & ((uint64_t) 1 << b)) {
+        s0 ^= s[0];
+        s1 ^= s[1];
+        s2 ^= s[2];
+        s3 ^= s[3];
+      }
+      next(s);
+    }
+  }
+  s[0] = s0;
+  s[1] = s1;
+  s[2] = s2;
+  s[3] = s3;
+  return Val_unit;
+}
+
+CAMLprim value pringo_xoshiro_alloc(value vunit)
+{
+  value res = caml_alloc_small(Wsizeof(struct xoshiro), Abstract_tag);
+  memset(Xoshiro_val(res), 0, sizeof(struct xoshiro));
+  return res;
+}
+
+CAMLprim value pringo_xoshiro_seed(value vstate, value vseed)
+{
+  uint64_t * s = Xoshiro_val(vstate)->s;
+  mlsize_t len = caml_string_length(vseed);
+
+  s[0] = s[1] = s[2] = s[3] = 0;
+  for (mlsize_t i = 0; i < len; i++) {
+    s[i % 4] = rotl(s[i % 4], 8) ^ Byte_u(vseed, i);
+  }
+  for (int i = 0; i < 4; i++) {
+    if (s[i] == 0) s[i] = 1;
+  }
+  return Val_unit;
+}
+
+CAMLprim value pringo_xoshiro_init(value vstate, value vinit)
+{
+  uint64_t * s = Xoshiro_val(vstate)->s;
+  mlsize_t len = Wosize_val(vinit);
+
+  s[0] = s[1] = s[2] = s[3] = 0;
+  for (mlsize_t i = 0; i < len; i++) {
+    s[i % 4] = rotl(s[i % 4], 8) ^ Long_val(Field(vinit, i));
+  }
+  for (int i = 0; i < 4; i++) {
+    if (s[i] == 0) s[i] = 1;
+  }
+  return Val_unit;
+}
+
+CAMLprim value pringo_xoshiro_blit(value vsrc, value vdst)
+{
+  memcpy(Xoshiro_val(vdst), Xoshiro_val(vsrc), sizeof(struct xoshiro));
+  return Val_unit;
+}

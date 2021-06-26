@@ -152,6 +152,25 @@ let rec uniform g =
 
 let float g bound = uniform g *. bound
 
+let (>>) = Int64.shift_right_logical
+
+let bytes g dst ofs len =
+  if ofs < 0 || len < 0 || ofs > Bytes.length dst - len then
+    invalid_arg (X.errorprefix ^ "bytes");
+  let rec fill ofs len =
+    let n = X.bits64 g in
+    setbyte dst ofs (Int64.to_int n);
+    if len > 1 then setbyte dst (ofs+1) (Int64.to_int (n >> 8));
+    if len > 2 then setbyte dst (ofs+2) (Int64.to_int (n >> 16));
+    if len > 3 then setbyte dst (ofs+3) (Int64.to_int (n >> 24));
+    if len > 4 then setbyte dst (ofs+4) (Int64.to_int (n >> 32));
+    if len > 5 then setbyte dst (ofs+5) (Int64.to_int (n >> 40));
+    if len > 6 then setbyte dst (ofs+6) (Int64.to_int (n >> 48));
+    if len > 7 then setbyte dst (ofs+7) (Int64.to_int (n >> 56));
+    if len > 8 then fill (ofs + 8) (len - 8)
+  in
+    if len > 0 then fill ofs len
+
 end
 
 (** Derived operations for the PURE interface *)
@@ -315,24 +334,6 @@ include StateDerived(struct
   let bits64 = bits64
   let errorprefix = "PRNG.Splitmix.State."
 end)
-
-let bytes g dst ofs len =
-  if ofs < 0 || len < 0 || ofs > Bytes.length dst - len then
-    invalid_arg "PRNG.State.bytes"
-  else begin
-    let rec fill ofs len =
-      let n = bits64 g in
-      setbyte dst ofs (Int64.to_int n);
-      if len > 1 then setbyte dst (ofs+1) (Int64.to_int (n >> 8));
-      if len > 2 then setbyte dst (ofs+2) (Int64.to_int (n >> 16));
-      if len > 3 then setbyte dst (ofs+3) (Int64.to_int (n >> 24));
-      if len > 4 then setbyte dst (ofs+4) (Int64.to_int (n >> 32));
-      if len > 5 then setbyte dst (ofs+5) (Int64.to_int (n >> 40));
-      if len > 6 then setbyte dst (ofs+6) (Int64.to_int (n >> 48));
-      if len > 7 then setbyte dst (ofs+7) (Int64.to_int (n >> 56));
-      if len > 8 then fill (ofs + 8) (len - 8)
-    in if len > 0 then fill ofs len
-  end
 
 let split g =
   let n1 = nextseed g in
@@ -692,5 +693,78 @@ let split g =
   ( { key = g.key; st = chacha_make_state k; next = 64 }, g )
 
 end
+
+end
+
+(** This is the Xoshiro256++ PRNG by David Blackman and Sebastiano Vigna  *)
+(** Available only with the imperative API *)
+
+module Xoshiro = struct
+
+type state
+external next: state -> (int64[@unboxed])
+   = "pringo_xoshiro_next" "pringo_xoshiro_next_unboxed"
+external jump: state -> unit = "pringo_xoshiro_jump"
+external alloc: unit -> state = "pringo_xoshiro_alloc"
+external seed_: state -> string -> unit = "pringo_xoshiro_seed"
+external init: state -> int array -> unit = "pringo_xoshiro_init"
+external blit: src:state -> dst:state -> unit = "pringo_xoshiro_blit"
+
+let copy_state st =
+  let st' = alloc() in blit ~src:st ~dst:st'; st'
+
+type t = { current: state; master: state }
+
+let seed data =
+  let master = alloc() in
+  seed_ master data;
+  { current = copy_state master; master }
+
+let make data =
+  let master = alloc() in
+  init master data;
+  { current = copy_state master; master }
+
+let make_self_init () =
+  match dev_urandom_seed 32 with
+  | Some s -> seed s
+  | None   -> make (sys_random_seed())
+
+let bit g = Int64.to_int (next g.current) land 0x1 = 1
+let bool = bit
+
+let bits8 g = Int64.to_int (next g.current) land 0xFF
+let byte = bits8
+let char g = Char.chr (bits8 g)
+
+let bits30 g = Int64.to_int (next g.current) land 0x3FFFFFFF
+let bits = bits30
+
+let bits32 g = Int64.to_int32 (next g.current)
+
+let bits64 g = next g.current
+
+include StateDerived(struct
+  type nonrec t = t
+  let bits30 = bits30
+  let bits32 = bits32
+  let bits64 = bits64
+  let errorprefix = "PRNG.Xoshiro."
+end)
+
+let split g =
+  jump g.master;
+  { current = copy_state g.master; master = g.master }
+
+let copy g =
+  { current = copy_state g.current; master = g.master }
+
+let reseed g data =
+  seed_ g.master data;
+  blit ~src:g.master ~dst:g.current
+
+let remake g data =
+  init g.master data;
+  blit ~src:g.master ~dst:g.current
 
 end

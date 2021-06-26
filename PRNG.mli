@@ -246,3 +246,20 @@ end
 
       Reseeding is recommended after 2{^64} numbers have been generated. *)
 
+(** {2 The Xoshiro implementation} *)
+
+module Xoshiro: STATE
+
+  (** This is an implementation of the [STATE] interface based on the
+      Xoshiro256++ PRNG by David Blackman and Sebastiano Vigna.
+
+      For seeding, 128 bits of entropy is recommended.  All characters
+      of the seed participate in the seeding.
+
+      Splitting is implemented by jumping the initial state of the generator
+      ahead by 2{^128} steps.  In other words, the 2{^256} state space
+      is decomposed in 2{^128} sequences of length 2{^128} each.
+      Splitting returns the next sequence in this decomposition.
+
+      Reseeding is recommended after 2{^64} numbers have been generated. *)
+

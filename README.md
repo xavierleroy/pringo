@@ -8,19 +8,22 @@ Compared with the pseudo-random number generators provided by the `Random` modul
 * They are **splittable**: they support a `split` operation that returns a new generator that is statistically independent from the current generator.  Both generators can be used in parallel, and can be split further, without introducing statistical bias.  This splitting operation is particularly useful to implement the lazy generation of pseudo-random infinite data structures such as functions or streams.
 * In addition to a stateful, imperative interface resembling that of the `Random.State` standard library module, another, **purely functional interface** is provided.  In the functional interface, the current state of the PRNG appears as parameter but also as result of the number generation functions.  This interface can be used directly within a state monad.
 
-Two PRNGS are provided:
+Three PRNGS are provided:
 * `Splitmix`, as described in the paper [_Fast Splittable Pseudorandom Number Generators_](http://gee.cs.oswego.edu/dl/papers/oopsla14.pdf) by Guy L. Steele Jr., Doug Lea, and Christine H. Flood, published in the proceedings of OOPSLA 2014.
 * `Chacha`, which is based on the [Chacha stream cipher](https://cr.yp.to/chacha.html) by D. J. Bernstein. Splitting is implemented by pseudorandomly generating a 128-bit initial state for the new PRNG using the current PRNG.
+* `Xoshiro256++`, by [David Blackman and Sebastiano Vigna](https://prng.di.unimi.it/).
 
-Both PRNGs pass the [Dieharder](http://webhome.phy.duke.edu/~rgb/General/dieharder.php) statistical randomness test.
+The three PRNGs pass the [Dieharder](http://webhome.phy.duke.edu/~rgb/General/dieharder.php) statistical randomness test.
 
-On 64-bit architectures, `Splitmix` is the faster of the two, and is even slightly faster than OCaml's `Random` standard library implementation.
+On 64-bit architectures, `Xoshiro256++` is the fastest, followed by `Splitmix`.  Both are faster than OCaml's `Random` standard library implementation.
 
-On 32-bit architectures, `Chacha` is the faster of the two, a bit slower than OCaml's `Random` module.
+On 32-bit architectures, `Chacha` is the faster of the three, a bit slower than OCaml's `Random` module.
 
 Splitmix has a 64-bit internal state, which is diversified by a 64-bit value called γ.  Splitting is achieved by changing both γ and the state, while other operations change only the state.  For a fixed γ, the period is 2<sup>64</sup>, but it is recommended to reseed after 2<sup>32</sup> numbers were generated.  From the initial seed, 64 bits worth of entropy are used.  Splitmix is not cryptographically strong: the internal state can be reconstructed from any two consecutive calls to `bits64`.  
 
 Chacha is the 8-round Chacha stream cipher encrypting a sequence of zeros.  The internal state is a 128-bit counter.  Splitting is achieved by generating a pseudo-random initial value for the counter of the new PRNG.  The period of the PRNG is unclear.  It is recommended to generate no more than 2<sup>64</sup> bytes before reseeding.  Up to 32 bytes (256 bits) of the seed are used as the Chacha key, although 16 bytes (128 bits) are probably enough.  The PRNG is probably cryptographically strong, even though it uses the 8-round variant of Chacha, which has a lower security margin than the 20-round variant widely used as a stream cipher.
+
+Xoshiro256++ has a (you guessed it) 256-bit internal state from which a sequence of 64-bit integers is generated.  Splitting is achieved by "jumping ahead", i.e. advancing the sequence by 2<sup>128</sup> steps in one go.  This implementation of splitting has nice statistical properties but is significantly slower than the splitting operations of Splitmix and Chacha.
 
 ## Installation and usage
 

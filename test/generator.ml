@@ -16,7 +16,16 @@
 
 let seed = ref "Jamais un coup de dés n'abolira le hasard. -Mallarmé"
 
-module Maketest (R: PRNG.STATE) = struct
+module type MAKETEST = sig
+  val gen_bytes: unit -> unit
+  val gen_int32: unit -> unit
+  val gen_int64: unit -> unit
+  val gen_blocks: int -> unit
+  val treesplits: int -> unit
+  val laggedsplit: int -> unit
+end
+
+module Maketest (R: PRNG.STATE) : MAKETEST = struct
 
 let init () = R.seed !seed
 
@@ -91,51 +100,29 @@ end
 
 module T1 = Maketest(PRNG.Splitmix.State)
 module T2 = Maketest(PRNG.Chacha.State)
-
-let chacha = ref false
-
-let gen_bytes () = if !chacha then T2.gen_bytes() else T1.gen_bytes()
-let gen_int32 () = if !chacha then T2.gen_int32() else T1.gen_int32()
-let gen_int64 () = if !chacha then T2.gen_int64() else T1.gen_int64()
-let gen_blocks n = if !chacha then T2.gen_blocks n else T1.gen_blocks n
-let treesplits n = if !chacha then T2.treesplits n else T1.treesplits n
-let laggedsplit n = if !chacha then T2.laggedsplit n else T1.laggedsplit n
+module T3 = Maketest(PRNG.Xoshiro)
 
 let run_config s =
-  let l =
+  let (algo, l) =
     match String.split_on_char '-' s with
-    | "splitmix" :: l -> chacha := false; l
-    | "chacha" :: l -> chacha := true; l
+    | "splitmix" :: l -> ((module T1 : MAKETEST), l)
+    | "chacha" :: l   -> ((module T2 : MAKETEST), l)
+    | "xoshiro" :: l  -> ((module T3 : MAKETEST), l)
     | _ -> raise (Arg.Bad ("unknown configuration " ^ s)) in
+  let module M = (val algo : MAKETEST) in
   match l with
-  | ["seq8"] -> gen_bytes()
-  | ["seq32"] -> gen_int32()
-  | ["seq64"] -> gen_int64()
-  | ["block"; n] -> gen_blocks (int_of_string n)
-  | ["treesplit"; n] -> treesplits (int_of_string n)
-  | ["laggedsplit"; n] -> laggedsplit (int_of_string n)
+  | ["seq8"] -> M.gen_bytes()
+  | ["seq32"] -> M.gen_int32()
+  | ["seq64"] -> M.gen_int64()
+  | ["block"; n] -> M.gen_blocks (int_of_string n)
+  | ["treesplit"; n] -> M.treesplits (int_of_string n)
+  | ["laggedsplit"; n] -> M.laggedsplit (int_of_string n)
   | _ -> raise (Arg.Bad ("unknown configuration " ^ s))
 
 let _ =
   Arg.(parse [
-    "-splitmix", Clear chacha,
-      " Test the Splitmix implementation";
-    "-chacha", Set chacha,
-      " Test the Chacha implementation";
     "-seed", Set_string seed,
-      " <seed>  Choose a seed";
-    "-seq8", Unit gen_bytes,
-      " Produce 8-bit numbers sequentially";
-    "-seq32", Unit gen_int32,
-      " Produce 32-bit numbers sequentially";
-    "-seq64", Unit gen_int64,
-      " Produce 64-bit numbers sequentially";
-    "-block", Int gen_blocks,
-      " <n>  Produce n-byte blocks sequentially";
-    "-treesplit", Int treesplits,
-      " <n>  Perform 2^n splits then round robin between them";
-    "-laggedsplit", Int laggedsplit,
-      " <n>  Split, produce n 32-bit numbers, then use the split"
+      " <seed>  Choose a seed"
   ]
   run_config
   "Usage: ./generator <options> [config] | dieharder -a -g 200.\nOptions are:")
