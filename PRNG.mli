@@ -212,7 +212,8 @@ module Splitmix: sig
 end
   (** This is an implementation of the [STATE] and [PURE] interfaces
       based on the Splitmix design by Guy L. Steele Jr., Doug Lea, and
-      Christine H. Flood.  
+      Christine H. Flood and its implementation in class SplittableRandom
+      of the Java Development Kit.  
 
       For seeding, 64 bits of entropy is recommended.  Seeds of 8
       characters or less are used as a 64-bit integer.  Longer seeds

@@ -22,9 +22,10 @@
 
 CAMLprim uint64_t pringo_mix64_unboxed(uint64_t z)
 {
-  z = (z ^ (z >> 33)) * 0xff51afd7ed558ccdULL;
-  z = (z ^ (z >> 33)) * 0xc4ceb9fe1a85ec53ULL;
-  return z ^ (z >> 33);
+  /* This is "Stafford variant 13" as used in the JDK */
+  z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9ULL;
+  z = (z ^ (z >> 27)) * 0x94d049bb133111ebULL;
+  return z ^ (z >> 31);
 }
 
 CAMLprim value pringo_mix64(value vz)
@@ -34,8 +35,9 @@ CAMLprim value pringo_mix64(value vz)
 
 CAMLprim uint32_t pringo_mix32_unboxed(uint64_t z)
 {
-  z = (z ^ (z >> 33)) * 0xff51afd7ed558ccdULL;
-  z = (z ^ (z >> 33)) * 0xc4ceb9fe1a85ec53ULL;
+  /* This is "Stafford variant 4" as used in the JDK */
+  z = (z ^ (z >> 33)) * 0x62a9d9ed799705f5L;
+  z = (z ^ (z >> 28)) * 0xcb24d0a5c88c35b3L;
   return (uint32_t)(z >> 32);
 }
 
@@ -46,21 +48,14 @@ CAMLprim value pringo_mix32(value vz)
 
 static inline intnat pringo_mix30_unboxed(uint64_t z)
 {
-  z = (z ^ (z >> 33)) * 0xff51afd7ed558ccdULL;
-  z = (z ^ (z >> 33)) * 0xc4ceb9fe1a85ec53ULL;
+  z = (z ^ (z >> 33)) * 0x62a9d9ed799705f5L;
+  z = (z ^ (z >> 28)) * 0xcb24d0a5c88c35b3L;
   return (intnat)(z >> 34);
 }
 
 CAMLprim value pringo_mix30(value vz)
 {
   return Val_long(pringo_mix30_unboxed(Int64_val(vz)));
-}
-
-static inline uint64_t mix64variant13(uint64_t z)
-{
-  z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9ULL;
-  z = (z ^ (z >> 27)) * 0x94d049bb133111ebULL;
-  return z ^ (z >> 31);
 }
 
 static inline int popcount64(uint64_t x)
@@ -73,9 +68,12 @@ static inline int popcount64(uint64_t x)
 
 CAMLprim uint64_t pringo_mixGamma_unboxed(uint64_t z)
 {
-  z = mix64variant13(z) | 1ULL;
-  if (popcount64(z ^ (z >> 1)) < 24) z ^= 0xaaaaaaaaaaaaaaaaULL;
-  return z; 
+  int n;
+  z = (z ^ (z >> 33)) * 0xff51afd7ed558ccdULL; /* MurmurHash3 mix constants */
+  z = (z ^ (z >> 33)) * 0xc4ceb9fe1a85ec53ULL;
+  z = (z ^ (z >> 33)) | 1;
+  n = popcount64(z ^ (z >> 1));
+  return n < 24 ? z ^= 0xaaaaaaaaaaaaaaaaULL : z;
 }
 
 CAMLprim value pringo_mixGamma(value vz)
