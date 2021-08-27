@@ -1,4 +1,4 @@
-OCAMLFLAGS=-g -safe-string
+OCAMLFLAGS=-g -safe-string -bin-annot
 OCAMLC=ocamlc $(OCAMLFLAGS)
 OCAMLOPT=ocamlopt $(OCAMLFLAGS)
 OCAMLDEP=ocamldep
@@ -29,7 +29,9 @@ clean::
 	rm -f *.cm[ioxa] *.cmxa *.$(O) *.$(A) *.$(SO)
 	rm -f test/*.cm[iox] test/*.$(O) test/*.exe
 
-TOINSTALL=PRNG.cmi PRNG.cma PRNG.cmxa PRNG.$(A) libPRNG.$(A) dllPRNG.$(SO)
+TOINSTALL=\
+  PRNG.mli PRNG.cmi PRNG.cmti \
+  PRNG.cma PRNG.cmxa PRNG.$(A) libPRNG.$(A) dllPRNG.$(SO)
 
 install:
 	$(OCAMLFIND) install pringo META $(TOINSTALL)
