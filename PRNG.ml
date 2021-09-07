@@ -255,7 +255,8 @@ external mix64: int64 -> int64 = "pringo_mix64" "pringo_mix64_unboxed"
   [@@unboxed] [@@noalloc]
 external mix32: int64 -> int32 = "pringo_mix32" "pringo_mix32_unboxed"
   [@@unboxed] [@@noalloc]
-external mix30: int64 -> int = "pringo_mix30"
+external mix30: (int64[@unboxed]) -> int = "pringo_mix30" "pringo_mix30_unboxed"
+  [@@noalloc]
 external mixGamma: int64 -> int64 = "pringo_mixGamma" "pringo_mixGamma_unboxed"
   [@@unboxed] [@@noalloc]
 

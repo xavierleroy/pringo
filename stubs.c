@@ -44,16 +44,16 @@ CAMLprim value pringo_mix32(value vz)
   return caml_copy_int32(pringo_mix32_unboxed(Int64_val(vz)));
 }
 
-static inline intnat pringo_mix30_unboxed(uint64_t z)
+CAMLprim value pringo_mix30_unboxed(uint64_t z)
 {
   z = (z ^ (z >> 33)) * 0xff51afd7ed558ccdULL;
   z = (z ^ (z >> 33)) * 0xc4ceb9fe1a85ec53ULL;
-  return (intnat)(z >> 34);
+  return Val_long((intnat)(z >> 34));
 }
 
 CAMLprim value pringo_mix30(value vz)
 {
-  return Val_long(pringo_mix30_unboxed(Int64_val(vz)));
+  return pringo_mix30_unboxed(Int64_val(vz));
 }
 
 static inline uint64_t mix64variant13(uint64_t z)
