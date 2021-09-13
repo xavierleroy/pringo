@@ -1,3 +1,7 @@
+Release 1.2, 2021-09-13
+- #3: unbox the argument of the mix30 C stub
+- Install .cmti and .mli files for documentation
+
 Release 1.1, 2020-11-06
 - Fixed wrong buffering in function Chacha.State.bytes
 - Reduced number of Chacha rounds from 20 to 8, to improve performance
