@@ -20,6 +20,7 @@ module type STATE = sig
   val make_self_init: unit -> t
   val bool: t -> bool
   val bit: t -> bool
+  val uniform: t -> float
   val float: t -> float -> float
   val byte: t -> int
   val bits8: t -> int
@@ -49,6 +50,7 @@ module type PURE = sig
   val make_self_init: unit -> t
   val bool: t -> bool * t
   val bit: t -> bool * t
+  val uniform: t -> float * t
   val float: float -> t -> float * t
   val byte: t -> int * t
   val bits8: t -> int * t
@@ -143,14 +145,12 @@ let nativeint =
   then fun g bound -> Nativeint.of_int32 (int32 g (Nativeint.to_int32 bound))
   else fun g bound -> Int64.to_nativeint (int64 g (Int64.of_nativeint bound))
 
-let float_64 g bound =
+let rec uniform g =
   let b = X.bits64 g in
-  (Int64.(to_float (shift_right_logical b 11)) *. 0x1.p-53) *. bound
+  let n = Int64.shift_right_logical b 11 in
+  if n = 0L then uniform g else Int64.to_float n *. 0x1.p-53
 
-let float_32 g bound =
-  let a = X.bits30 g in
-  let b = X.bits30 g in
-  (float a *. 0x1.p-60 +. float b *. 0x1.p-30) *. bound
+let float g bound = uniform g *. bound
 
 end
 
@@ -218,14 +218,13 @@ let nativeint =
       (Int64.to_nativeint r, g')
   end
 
-let float_64 bound g =
+let rec uniform g =
   let (b, g) = X.bits64 g in
-  ((Int64.(to_float (shift_right_logical b 11)) *. 0x1.p-53) *. bound, g)
+  let n = Int64.shift_right_logical b 11 in
+  if n = 0L then uniform g else (Int64.to_float n *. 0x1.p-53, g)
 
-let float_32 bound g =
-  let (a, g) = X.bits30 g in
-  let (b, g) = X.bits30 g in
-  ((float a *. 0x1.p-60 +. float b *. 0x1.p-30) *. bound, g)
+let float bound g = 
+  let (f, g) = uniform g in (f *. bound, g)
 
 end
 
@@ -317,8 +316,6 @@ include StateDerived(struct
   let errorprefix = "PRNG.Splitmix.State."
 end)
 
-let float = float_64
-
 let bytes g dst ofs len =
   if ofs < 0 || len < 0 || ofs > Bytes.length dst - len then
     invalid_arg "PRNG.State.bytes"
@@ -400,8 +397,6 @@ include PureDerived(struct
   let bits64 = bits64
   let errorprefix = "PRNG.Splitmix.Pure."
 end)
-
-let float = float_64
 
 let split g =
   let g1 = next g in
@@ -554,8 +549,6 @@ include StateDerived(struct
   let errorprefix = "PRNG.Chacha.State."
 end)
 
-let float = if Sys.word_size = 64 then float_64 else float_32
-
 let bytes g dst ofs len =
   if ofs < 0 || len < 0 || Bytes.length dst - len > ofs then
     invalid_arg "PRNG.Chacha.State.bytes";
@@ -675,8 +668,6 @@ include PureDerived(struct
   let bits64 = bits64
   let errorprefix = "PRNG.Chacha.Pure."
 end)
-
-let float = if Sys.word_size = 64 then float_64 else float_32
 
 let bytes g dst ofs len =
   if ofs < 0 || len < 0 || Bytes.length dst - len > ofs then
