@@ -148,7 +148,7 @@ let nativeint =
 let rec uniform g =
   let b = X.bits64 g in
   let n = Int64.shift_right_logical b 11 in
-  if n = 0L then uniform g else Int64.to_float n *. 0x1.p-53
+  if n <> 0L then Int64.to_float n *. 0x1.p-53 else uniform g
 
 let float g bound = uniform g *. bound
 
@@ -221,7 +221,7 @@ let nativeint =
 let rec uniform g =
   let (b, g) = X.bits64 g in
   let n = Int64.shift_right_logical b 11 in
-  if n = 0L then uniform g else (Int64.to_float n *. 0x1.p-53, g)
+  if n <> 0L then (Int64.to_float n *. 0x1.p-53, g) else uniform g
 
 let float bound g = 
   let (f, g) = uniform g in (f *. bound, g)
