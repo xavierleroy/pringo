@@ -71,7 +71,7 @@ module type STATE = sig
         between [x] and 0.0 are returned.  Implemented as [uniform g *. x].
         Consequently, the values [0.0] and [x] can be returned
         (as a result of floating-point rounding), but not if [x] is
-        [1.0], in which case [float g x] behaves like [uniform g]. *)
+        [1.0], since [float g 1.0] behaves exactly like [uniform g]. *)
 
   val byte: t -> int
   val bits8: t -> int
