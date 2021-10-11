@@ -59,10 +59,19 @@ module type STATE = sig
   val bit: t -> bool
     (** Return a Boolean value in [false,true] with 0.5 probability each. *)
 
+  val uniform: t -> float
+    (** Return a floating-point number evenly distributed between 0.0 and 1.0.
+        0.0 and 1.0 are never returned.
+        The result is of the form [n * 2{^-53}], where [n] is a random integer
+        in [(0, 2{^53})]. *)
+
   val float: t -> float -> float
     (** [float g x] returns a floating-point number evenly distributed
-        between 0.0 and [x].  If [x] is negative, negative numbers 
-        between [x] and 0.0 are returned. *)
+        between 0.0 and [x].  If [x] is negative, negative numbers
+        between [x] and 0.0 are returned.  Implemented as [uniform g *. x].
+        Consequently, the values [0.0] and [x] can be returned
+        (as a result of floating-point rounding), but not if [x] is
+        [1.0], since [float g 1.0] behaves exactly like [uniform g]. *)
 
   val byte: t -> int
   val bits8: t -> int
@@ -90,7 +99,7 @@ module type STATE = sig
         Note that [int32 Int32.max_int] produces numbers between 0 and
         [Int32.max_int] excluded.  To produce numbers between 0 and
         [Int32.max_int] included, use
-        [Int32.logand (bits32 g) Int64.max_int]. *)
+        [Int32.logand (bits32 g) Int32.max_int]. *)
 
   val bits64: t -> int64
     (** Return a 64-bit integer evenly distributed between
@@ -179,6 +188,7 @@ module type PURE = sig
   val bool: t -> bool * t
   val bit: t -> bool * t
 
+  val uniform: t -> float * t
   val float: float -> t -> float * t
 
   val byte: t -> int * t
