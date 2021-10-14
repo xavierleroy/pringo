@@ -275,8 +275,19 @@ static void chacha20_init_key(struct chacha20_key * k,
 
 /* Primitives for Xoshiro256++ */
 
+typedef union {
+  uint64_t l;
+  uint32_t w[2];
+} u64;
+
+#ifdef ARCH_BIG_ENDIAN
+enum { HI = 0, LO = 1 };
+#else
+enum { HI = 1, LO = 0 };
+#endif
+
 struct xoshiro {
-  uint64_t s[4];
+  u64 s[4];
 };
 
 #define Xoshiro_val(v) ((struct xoshiro *) Data_abstract_val(v))
@@ -285,16 +296,38 @@ static inline uint64_t rotl(const uint64_t x, int k) {
   return (x << k) | (x >> (64 - k));
 }
 
-static inline uint64_t next(uint64_t s[4])
+#ifdef ARCH_ALIGN_INT64
+static inline uint64_t getl(const u64 * p)
 {
-  const uint64_t result = rotl(s[0] + s[3], 23) + s[0];
-  const uint64_t t = s[1] << 17;
-  s[2] ^= s[0];
-  s[3] ^= s[1];
-  s[1] ^= s[2];
-  s[0] ^= s[3];
-  s[2] ^= t;
-  s[3] = rotl(s[3], 45);
+  return (uint64_t) p->w[LO] | ((uint64_t) p->w[HI] << 32);
+}
+static inline void setl(u64 * p, uint64_t v)
+{
+  p->w[LO] = v; p->w[HI] = v >> 32;
+}
+#else
+static inline uint64_t getl(const u64 * p) { return p->l; }
+static inline void setl(u64 * p, uint64_t v) { p->l = v; }
+#endif
+
+static inline uint64_t next(u64 s[4])
+{
+  uint64_t s0 = getl(s + 0);
+  uint64_t s1 = getl(s + 1);
+  uint64_t s2 = getl(s + 2);
+  uint64_t s3 = getl(s + 3);
+  const uint64_t result = rotl(s0 + s3, 23) + s0;
+  const uint64_t t = s1 << 17;
+  s2 ^= s0;
+  s3 ^= s1;
+  s1 ^= s2;
+  s0 ^= s3;
+  s2 ^= t;
+  s3 = rotl(s3, 45);
+  setl(s + 0, s0);
+  setl(s + 1, s1);
+  setl(s + 2, s2);
+  setl(s + 3, s3);
   return result;
 }
 
@@ -314,7 +347,7 @@ CAMLprim value pringo_xoshiro_jump(value vstate)
     0x180ec6d33cfd0aba, 0xd5a61266f0c9392c,
     0xa9582618e03fc9aa, 0x39abdc4529b1661c
   };
-  uint64_t * s = Xoshiro_val(vstate)->s;
+  u64 * s = Xoshiro_val(vstate)->s;
   uint64_t s0 = 0;
   uint64_t s1 = 0;
   uint64_t s2 = 0;
@@ -322,18 +355,18 @@ CAMLprim value pringo_xoshiro_jump(value vstate)
   for(int i = 0; i < sizeof JUMP / sizeof *JUMP; i++) {
     for(int b = 0; b < 64; b++) {
       if (JUMP[i] & ((uint64_t) 1 << b)) {
-        s0 ^= s[0];
-        s1 ^= s[1];
-        s2 ^= s[2];
-        s3 ^= s[3];
+        s0 ^= getl(s + 0);
+        s1 ^= getl(s + 1);
+        s2 ^= getl(s + 2);
+        s3 ^= getl(s + 3);
       }
       next(s);
     }
   }
-  s[0] = s0;
-  s[1] = s1;
-  s[2] = s2;
-  s[3] = s3;
+  setl(s + 0, s0);
+  setl(s + 1, s1);
+  setl(s + 2, s2);
+  setl(s + 3, s3);
   return Val_unit;
 }
 
@@ -346,7 +379,7 @@ CAMLprim value pringo_xoshiro_alloc(value vunit)
 
 CAMLprim value pringo_xoshiro_seed(value vstate, value vseed)
 {
-  uint64_t * s = Xoshiro_val(vstate)->s;
+  uint64_t s[4];
   mlsize_t len = caml_string_length(vseed);
 
   s[0] = s[1] = s[2] = s[3] = 0;
@@ -356,12 +389,13 @@ CAMLprim value pringo_xoshiro_seed(value vstate, value vseed)
   for (int i = 0; i < 4; i++) {
     if (s[i] == 0) s[i] = 1;
   }
+  memcpy(Xoshiro_val(vstate)->s, s, sizeof(s));
   return Val_unit;
 }
 
 CAMLprim value pringo_xoshiro_init(value vstate, value vinit)
 {
-  uint64_t * s = Xoshiro_val(vstate)->s;
+  uint64_t s[4];
   mlsize_t len = Wosize_val(vinit);
 
   s[0] = s[1] = s[2] = s[3] = 0;
@@ -371,6 +405,7 @@ CAMLprim value pringo_xoshiro_init(value vstate, value vinit)
   for (int i = 0; i < 4; i++) {
     if (s[i] == 0) s[i] = 1;
   }
+  memcpy(Xoshiro_val(vstate)->s, s, sizeof(s));
   return Val_unit;
 }
 
