@@ -272,3 +272,102 @@ static void chacha20_init_key(struct chacha20_key * k,
   k->key[10] = U8TO32_LITTLE(key + 8);
   k->key[11] = U8TO32_LITTLE(key + 12);
 }
+
+/* Primitives for LXM.  We use the L64X128 variant */
+
+static const uint64_t M = 0xd1342543de82ef95;
+
+struct LXM_state {
+  uint64_t a;            /* per-instance additive parameter (odd) */
+  uint64_t s;            /* state of the LCG subgenerator */
+  uint64_t x[2];         /* state of the XBG subgenerator (not 0) */
+};
+
+#define LXM_val(v) ((struct LXM_state *) Data_abstract_val(v))
+
+static inline uint64_t rotl(const uint64_t x, int k) {
+  return (x << k) | (x >> (64 - k));
+}
+
+CAMLprim uint64_t pringo_LXM_next_unboxed(value v)
+{
+  uint64_t z, q0, q1;
+  struct LXM_state * st = LXM_val(v);
+
+  /* Combining operation */
+  z = st->s + st->x[0];
+  /* Mixing function */
+  z = (z ^ (z >> 32)) * 0xdaba0b6eb09322e3;
+  z = (z ^ (z >> 32)) * 0xdaba0b6eb09322e3;
+  z = (z ^ (z >> 32));
+  /* LCG update */
+  st->s = st->s * M + st->a;
+  /* XBG update */
+  q0 = st->x[0]; q1 = st->x[1];
+  q1 ^= q0;
+  q0 = rotl(q0, 24);
+  q0 = q0 ^ q1 ^ (q1 << 16);
+  q1 = rotl(q1, 37);
+  st->x[0] = q0; st->x[1] = q1;
+  /* Return result */
+  return z;
+}
+
+CAMLprim value pringo_LXM_next(value v)
+{
+  return caml_copy_int64(pringo_LXM_next_unboxed(v));
+}
+
+CAMLprim value pringo_LXM_copy(value v)
+{
+  value res = caml_alloc_small(Wsizeof(struct LXM_state), Abstract_tag);
+  memcpy(LXM_val(res), LXM_val(v), sizeof(struct LXM_state));
+  return res;
+}
+
+CAMLprim value pringo_LXM_assign(value vdst, value vsrc)
+{
+  memcpy(LXM_val(vdst), LXM_val(vsrc), sizeof(struct LXM_state));
+  return Val_unit;
+}
+
+CAMLprim value pringo_LXM_init_unboxed(uint64_t i1, uint64_t i2,
+                                       uint64_t i3, uint64_t i4)
+{
+  value v = caml_alloc_small(Wsizeof(struct LXM_state), Abstract_tag);
+  struct LXM_state * st = LXM_val(v);
+  st->a = i1 | 1;    /* must be odd */
+  st->x[0] = i2 != 0 ? i2 : 1; /* must be nonzero */
+  st->x[1] = i3 != 0 ? i3 : 2; /* must be nonzero */
+  st->s = i4;
+  return v;
+}
+
+CAMLprim value pringo_LXM_init(value i1, value i2, value i3, value i4)
+{
+  return pringo_LXM_init_unboxed(Int64_val(i1), Int64_val(i2),
+                                     Int64_val(i3), Int64_val(i4));
+}
+
+CAMLprim value pringo_LXM_seed(value s)
+{
+  uint64_t d[4] = {0, 0, 0, 0};
+  mlsize_t i, len;
+  for (i = 0, len = caml_string_length(s); i < len; i++) {
+    d[i % 4] = (d[i % 4] << 8) | Byte_u(s, i);
+  }
+  return pringo_LXM_init_unboxed(d[0], d[1], d[2], d[3]);
+}
+
+CAMLprim value pringo_LXM_make(value a)
+{
+  const uint64_t mix = 6364136223846793005;
+  /* Multiplier taken from the MMIX LCG, Knoth TAOCP vol 2, 1998 edition */
+  uint64_t d[4] = {0, 0, 0, 0};
+  mlsize_t i, len;
+  for (i = 0, len = Wosize_val(a); i < len; i++) {
+    d[i % 4] = d[i % 4] * mix + Long_val(Field(a, i));
+  }
+  return pringo_LXM_init_unboxed(d[0], d[1], d[2], d[3]);
+}
+

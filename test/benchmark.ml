@@ -82,6 +82,7 @@ end
 
 module BSS = BState(Splitmix.State)   module BSP = BPure(Splitmix.Pure)
 module BCS = BState(Chacha.State)     module BCP = BPure(Chacha.Pure)
+module BXS = BState(LXM.State)        module BXP = BPure(LXM.Pure)
 
 let _ =
   printf "Times are in seconds for %d repetitions, unless indicated.\n" n;
@@ -93,6 +94,10 @@ let _ =
   BCS.run();
   printf "---- Chacha, pure interface ----\n";
   BCP.run();
+  printf "---- LXM, state interface ----\n";
+  BXS.run();
+  printf "---- LXM, pure interface ----\n";
+  BXP.run();
   printf "---- OCaml's Random module ----\n";
   time_fn "bit" (repeat0 n Random.bool);
   time_fn "bits" (repeat0 n Random.bits);

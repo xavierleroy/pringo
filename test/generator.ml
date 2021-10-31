@@ -16,7 +16,16 @@
 
 let seed = ref "Jamais un coup de dés n'abolira le hasard. -Mallarmé"
 
-module Maketest (R: PRNG.STATE) = struct
+module type TEST = sig
+  val gen_bytes: unit -> unit
+  val gen_int32: unit -> unit
+  val gen_int64: unit -> unit
+  val gen_blocks: int -> unit
+  val treesplits: int -> unit
+  val laggedsplit: int -> unit
+end
+
+module Maketest (R: PRNG.STATE) : TEST = struct
 
 let init () = R.seed !seed
 
@@ -91,21 +100,29 @@ end
 
 module T1 = Maketest(PRNG.Splitmix.State)
 module T2 = Maketest(PRNG.Chacha.State)
+module T3 = Maketest(PRNG.LXM.State)
 
-let chacha = ref false
+let dut = ref (module T1 : TEST)
 
-let gen_bytes () = if !chacha then T2.gen_bytes() else T1.gen_bytes()
-let gen_int32 () = if !chacha then T2.gen_int32() else T1.gen_int32()
-let gen_int64 () = if !chacha then T2.gen_int64() else T1.gen_int64()
-let gen_blocks n = if !chacha then T2.gen_blocks n else T1.gen_blocks n
-let treesplits n = if !chacha then T2.treesplits n else T1.treesplits n
-let laggedsplit n = if !chacha then T2.laggedsplit n else T1.laggedsplit n
+let gen_bytes () =
+  let module T = (val !dut) in T.gen_bytes()
+let gen_int32 () =
+  let module T = (val !dut) in T.gen_int32()
+let gen_int64 () =
+  let module T = (val !dut) in T.gen_int64()
+let gen_blocks n =
+  let module T = (val !dut) in T.gen_blocks n
+let treesplits n =
+  let module T = (val !dut) in T.treesplits n
+let laggedsplit n =
+  let module T = (val !dut) in T.laggedsplit n
 
 let run_config s =
   let l =
     match String.split_on_char '-' s with
-    | "splitmix" :: l -> chacha := false; l
-    | "chacha" :: l -> chacha := true; l
+    | "splitmix" :: l -> dut := (module T1 : TEST); l
+    | "chacha" :: l -> dut := (module T2 : TEST); l
+    | "lxm" :: l -> dut := (module T3 : TEST); l
     | _ -> raise (Arg.Bad ("unknown configuration " ^ s)) in
   match l with
   | ["seq8"] -> gen_bytes()
@@ -118,10 +135,12 @@ let run_config s =
 
 let _ =
   Arg.(parse [
-    "-splitmix", Clear chacha,
+    "-splitmix", Unit (fun () -> dut := (module T1 : TEST)),
       " Test the Splitmix implementation";
-    "-chacha", Set chacha,
+    "-chacha", Unit (fun () -> dut := (module T2 : TEST)),
       " Test the Chacha implementation";
+    "-lxm", Unit (fun () -> dut := (module T3 : TEST)),
+      " Test the LXM implementation";
     "-seed", Set_string seed,
       " <seed>  Choose a seed";
     "-seq8", Unit gen_bytes,
