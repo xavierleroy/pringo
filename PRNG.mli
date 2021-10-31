@@ -246,3 +246,19 @@ end
 
       Reseeding is recommended after 2{^64} numbers have been generated. *)
 
+(** {2 The LXM implementation} *)
+
+module LXM: sig
+  module State: STATE
+  module Pure: PURE
+end
+  (** This is an implementation of the [STATE] and [PURE] interfaces
+      based on the LXM design by Guy L. Steele Jr, and Sebastiano Vigna.
+      We use the L64X128 variant from Fig. 1 of their OOPSLA 2021 paper.
+
+      For seeding, 128 bits of entropy is recommended.  The last 32 bytes
+      of the seed are used to initialize the PRNG state.
+
+      This PRNG has a large internal state (192 bits) and a period of
+      2{^192} - 2{^64}.  Therefore, reseeding should not be necessary
+      in practice. *)

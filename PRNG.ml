@@ -152,6 +152,32 @@ let rec uniform g =
 
 let float g bound = uniform g *. bound
 
+let bytes g dst ofs len =
+  if ofs < 0 || len < 0 || ofs > Bytes.length dst - len then
+    invalid_arg (X.errorprefix ^ "bytes")
+  else begin
+    let rec fill ofs len =
+      let n = X.bits64 g in
+      setbyte dst ofs (Int64.to_int n);
+      if len > 1 then
+        setbyte dst (ofs+1) (Int64.to_int (Int64.shift_right n 8));
+      if len > 2 then
+        setbyte dst (ofs+2) (Int64.to_int (Int64.shift_right n 16));
+      if len > 3 then
+        setbyte dst (ofs+3) (Int64.to_int (Int64.shift_right n 24));
+      if len > 4 then
+        setbyte dst (ofs+4) (Int64.to_int (Int64.shift_right n 32));
+      if len > 5 then
+        setbyte dst (ofs+5) (Int64.to_int (Int64.shift_right n 40));
+      if len > 6 then
+        setbyte dst (ofs+6) (Int64.to_int (Int64.shift_right n 48));
+      if len > 7 then
+        setbyte dst (ofs+7) (Int64.to_int (Int64.shift_right n 56));
+      if len > 8 then
+        fill (ofs + 8) (len - 8)
+    in if len > 0 then fill ofs len
+  end
+
 end
 
 (** Derived operations for the PURE interface *)
@@ -315,24 +341,6 @@ include StateDerived(struct
   let bits64 = bits64
   let errorprefix = "PRNG.Splitmix.State."
 end)
-
-let bytes g dst ofs len =
-  if ofs < 0 || len < 0 || ofs > Bytes.length dst - len then
-    invalid_arg "PRNG.State.bytes"
-  else begin
-    let rec fill ofs len =
-      let n = bits64 g in
-      setbyte dst ofs (Int64.to_int n);
-      if len > 1 then setbyte dst (ofs+1) (Int64.to_int (n >> 8));
-      if len > 2 then setbyte dst (ofs+2) (Int64.to_int (n >> 16));
-      if len > 3 then setbyte dst (ofs+3) (Int64.to_int (n >> 24));
-      if len > 4 then setbyte dst (ofs+4) (Int64.to_int (n >> 32));
-      if len > 5 then setbyte dst (ofs+5) (Int64.to_int (n >> 40));
-      if len > 6 then setbyte dst (ofs+6) (Int64.to_int (n >> 48));
-      if len > 7 then setbyte dst (ofs+7) (Int64.to_int (n >> 56));
-      if len > 8 then fill (ofs + 8) (len - 8)
-    in if len > 0 then fill ofs len
-  end
 
 let split g =
   let n1 = nextseed g in
@@ -690,6 +698,113 @@ let split g =
   let k = Bytes.create 16 in
   let g = bytes g k 0 16 in
   ( { key = g.key; st = chacha_make_state k; next = 64 }, g )
+
+end
+
+end
+
+(* The LXM implementation *)
+
+module LXM = struct
+
+type state
+
+external next: state -> (int64[@unboxed])
+                     = "pringo_LXM_next" "pringo_LXM_next_unboxed"
+external copy: state -> state = "pringo_LXM_copy"
+external assign: state -> state -> unit = "pringo_LXM_assign"
+external init: (int64[@unboxed]) -> (int64[@unboxed]) ->
+               (int64[@unboxed]) -> (int64[@unboxed]) -> state
+                     = "pringo_LXM_init" "pringo_LXM_init_unboxed"
+external seed: string -> state = "pringo_LXM_seed"
+external make: int array -> state = "pringo_LXM_make"
+
+(** The stateful interface *)
+
+module State = struct
+
+type t = state
+
+let seed = seed
+let make = make
+let make_self_init () =
+  match dev_urandom_seed 16 with
+  | Some s -> seed s
+  | None   -> make (sys_random_seed())
+
+let byte g = Int64.to_int (next g) land 0xFF
+let bits8 = byte
+let char g = Char.chr (bits8 g)
+let bit g = Int64.to_int (next g) land 0x1 = 1
+let bool = bit
+let bits30 g = Int64.to_int (next g) land 0x3FFFFFFF
+let bits = bits30
+let bits32 g = Int64.to_int32 (next g)
+let bits64 = next
+
+include StateDerived(struct
+  type nonrec t = t
+  let bits30 = bits30
+  let bits32 = bits32
+  let bits64 = bits64
+  let errorprefix = "PRNG.LXM.State."
+end)
+
+let split g =
+  let i1 = next g in let i2 = next g in let i3 = next g in let i4 = next g in
+  init i1 i2 i3 i4
+
+let copy = copy
+
+let reseed g s = assign g (seed s)
+let remake g s = assign g (make s)
+
+end
+
+(** The pure interface *)
+
+module Pure = struct
+
+type t = state
+
+let seed = seed
+let make = make
+let make_self_init () =
+  match dev_urandom_seed 16 with
+  | Some s -> seed s
+  | None   -> make (sys_random_seed())
+
+let byte g =
+  let g = copy g in (Int64.to_int (next g) land 0xFF, g)
+let bits8 = byte
+let char g = 
+  let (n, g') = bits8 g in (Char.chr n, g')
+let bit g =
+  let g = copy g in (Int64.to_int (next g) land 0x1 = 1, g)
+let bool = bit
+
+let bits30 g =
+  let g = copy g in (Int64.to_int (next g) land 0x3FFFFFFF, g)
+let bits = bits30
+
+let bits32 g =
+  let g = copy g in (Int64.to_int32 (next g), g)
+
+let bits64 g = 
+  let g = copy g in (next g, g)
+
+include PureDerived(struct
+  type nonrec t = t
+  let bits30 = bits30
+  let bits32 = bits32
+  let bits64 = bits64
+  let errorprefix = "PRNG.Chacha.Pure."
+end)
+
+let split g =
+  let g = copy g in
+  let i1 = next g in let i2 = next g in let i3 = next g in let i4 = next g in
+  (init i1 i2 i3 i4, g)
 
 end
 

@@ -54,7 +54,7 @@ testresults:
 TESTS=seq8 seq32 seq64 block-13 \
   treesplit-1 treesplit-4 laggedsplit-3 laggedsplit-10
 
-ALLTESTS=$(TESTS:%=splitmix-%) $(TESTS:%=chacha-%)
+ALLTESTS=$(TESTS:%=splitmix-%) $(TESTS:%=chacha-%) $(TESTS:%=lxm-%)
 
 SMALLTESTS=$(ALLTESTS:%=testresults/ent-%.log)
 
@@ -62,6 +62,7 @@ smalltest: $(SMALLTESTS)
 	@grep 'would exceed' $(SMALLTESTS) | sed -e 's/would exceed this value//'
 
 FULLTESTS=$(ALLTESTS:%=testresults/dh-%.log)
+
 fulltest: $(FULLTESTS)
 	@printf "PASSED: "; cat $(FULLTESTS) | grep -c PASSED
 	@printf "WEAK: "; cat $(FULLTESTS) | grep -c WEAK

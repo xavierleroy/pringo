@@ -95,6 +95,7 @@ end
 
 module ChkSplitmix = Checker(PRNG.Splitmix)
 module ChkChacha   = Checker(PRNG.Chacha)
+module ChkLXM      = Checker(PRNG.LXM)
 
 (* All together *)
 
@@ -107,6 +108,10 @@ let _ =
   ChkChacha.full_checks_seed 4 "Supercalifragiliciousexpialidolcius";
   printf "Chacha, with make...\n";
   ChkChacha.full_checks_make 4 [|314159; 2718|];
+  printf "LXM, with seed...\n";
+  ChkLXM.full_checks_seed 4 "Supercalifragiliciousexpialidolcius";
+  printf "LXM, with make...\n";
+  ChkLXM.full_checks_make 4 [|314159; 2718|];
   printf "Test passed!\n"
 
 
