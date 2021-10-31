@@ -14,6 +14,7 @@
 <link title="The purely-functional, monadic interface" rel="Section" href="#2_Thepurelyfunctionalmonadicinterface">
 <link title="The Splitmix implementation" rel="Section" href="#2_TheSplitmiximplementation">
 <link title="The Chacha-20 implementation" rel="Section" href="#2_TheChacha20implementation">
+<link title="The LXM implementation" rel="Section" href="#2_TheLXMimplementation">
 <title>PRNG</title>
 </head>
 <body>
@@ -55,11 +56,15 @@
   <code class="code">bytes</code> (too imperative) and <code class="code">copy</code>, <code class="code">reseed</code> and <code class="code">remake</code> (pointless).</p>
 
 <pre><span id="MODULETYPEPURE"><span class="keyword">module type</span> <a href="PRNG.PURE.html">PURE</a></span> = <code class="code">sig</code> <a href="PRNG.PURE.html">..</a> <code class="code">end</code></pre><h3 id="2_TheSplitmiximplementation">The Splitmix implementation</h3>
-<pre><span id="MODULESplitmix"><span class="keyword">module</span> <a href="PRNG.Splitmix.html">Splitmix</a></span>: <code class="code">sig</code> <a href="PRNG.Splitmix.html">..</a> <code class="code">end</code></pre><div class="info">
-<p>This is an implementation of the <code class="code">STATE</code> and <code class="code">PURE</code> interfaces
-      based on the Splitmix design by Guy L.</p>
+<pre><span id="MODULESplitmix"><span class="keyword">module</span> <a href="PRNG.Splitmix.html">Splitmix</a></span>: <code class="code">sig</code> <a href="PRNG.Splitmix.html">..</a> <code class="code">end</code></pre><p>This is an implementation of the <code class="code">STATE</code> and <code class="code">PURE</code> interfaces
+      based on the Splitmix design by Guy L. Steele Jr., Doug Lea, and
+      Christine H. Flood.</p>
 
-</div>
+<p>For seeding, 64 bits of entropy is recommended.  Seeds of 8
+      characters or less are used as a 64-bit integer.  Longer seeds
+      are hashed using <code class="code">Digest.string</code> before being used.</p>
+
+<p>Reseeding is recommended after 2<sup class="superscript">32</sup> numbers have been generated.</p>
 <h3 id="2_TheChacha20implementation">The Chacha-20 implementation</h3>
 <pre><span id="MODULEChacha"><span class="keyword">module</span> <a href="PRNG.Chacha.html">Chacha</a></span>: <code class="code">sig</code> <a href="PRNG.Chacha.html">..</a> <code class="code">end</code></pre><p>This is an implementation of the <code class="code">STATE</code> and <code class="code">PURE</code> interfaces
       based on the Chacha 20 stream cipher by D. J. Bernstein.</p>
@@ -69,4 +74,15 @@
       Characters beyond the first 32 are ignored.</p>
 
 <p>Reseeding is recommended after 2<sup class="superscript">64</sup> numbers have been generated.</p>
+<h3 id="2_TheLXMimplementation">The LXM implementation</h3>
+<pre><span id="MODULELXM"><span class="keyword">module</span> <a href="PRNG.LXM.html">LXM</a></span>: <code class="code">sig</code> <a href="PRNG.LXM.html">..</a> <code class="code">end</code></pre><p>This is an implementation of the <code class="code">STATE</code> and <code class="code">PURE</code> interfaces
+      based on the LXM design by Guy L. Steele Jr, and Sebastiano Vigna.
+      We use the L64X128 variant from Fig. 1 of their OOPSLA 2021 paper.</p>
+
+<p>For seeding, 128 bits of entropy is recommended.  The last 32 bytes
+      of the seed are used to initialize the PRNG state.</p>
+
+<p>This PRNG has a large internal state (192 bits) and a period of
+      2<sup class="superscript">192</sup> - 2<sup class="superscript">64</sup>.  Therefore, reseeding should not be necessary
+      in practice.</p>
 </body></html>

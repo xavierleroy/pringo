@@ -33,7 +33,7 @@
 </div>
 
 <h4 id="3_CreatingandseedingPRNGs">Creating and seeding PRNGs</h4>
-<pre><span id="VALseed"><span class="keyword">val</span> seed</span> : <code class="type">string -> <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
+<pre><span id="VALseed"><span class="keyword">val</span> seed</span> : <code class="type">string -&gt; <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
 <div class="info-desc">
 <p>Initialize a generator from the given seed.  The seed is given
         as a character string.  The length and randomness of the seed
@@ -44,14 +44,14 @@
 </div>
 </div>
 
-<pre><span id="VALmake"><span class="keyword">val</span> make</span> : <code class="type">int array -> <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
+<pre><span id="VALmake"><span class="keyword">val</span> make</span> : <code class="type">int array -&gt; <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
 <div class="info-desc">
 <p>Initialize a generator from the given seed.  The seed is given
         as an array of integers.</p>
 </div>
 </div>
 
-<pre><span id="VALmake_self_init"><span class="keyword">val</span> make_self_init</span> : <code class="type">unit -> <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
+<pre><span id="VALmake_self_init"><span class="keyword">val</span> make_self_init</span> : <code class="type">unit -&gt; <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
 <div class="info-desc">
 <p>Initialize a generator from a random seed obtained from the
         operating system.  Tries hard to provide at least 
@@ -60,37 +60,49 @@
 </div>
 </div>
 <h4 id="3_Generatingpseudorandomdata">Generating pseudo-random data</h4>
-<pre><span id="VALbool"><span class="keyword">val</span> bool</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> bool</code></pre>
-<pre><span id="VALbit"><span class="keyword">val</span> bit</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<pre><span id="VALbool"><span class="keyword">val</span> bool</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; bool</code></pre>
+<pre><span id="VALbit"><span class="keyword">val</span> bit</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; bool</code></pre><div class="info ">
 <div class="info-desc">
 <p>Return a Boolean value in <code class="code">false,true</code> with 0.5 probability each.</p>
 </div>
 </div>
 
-<pre><span id="VALfloat"><span class="keyword">val</span> float</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> float -> float</code></pre><div class="info ">
+<pre><span id="VALuniform"><span class="keyword">val</span> uniform</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; float</code></pre><div class="info ">
 <div class="info-desc">
-<p><code class="code">float g x</code> returns a floating-point number evenly distributed
-        between 0.0 and <code class="code">x</code>.  If <code class="code">x</code> is negative, negative numbers 
-        between <code class="code">x</code> and 0.0 are returned.</p>
+<p>Return a floating-point number evenly distributed between 0.0 and 1.0.
+        0.0 and 1.0 are never returned.
+        The result is of the form <code class="code">n * 2{^-53}</code>, where <code class="code">n</code> is a random integer
+        in <code class="code">(0, 2{^53})</code>.</p>
 </div>
 </div>
 
-<pre><span id="VALbyte"><span class="keyword">val</span> byte</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int</code></pre>
-<pre><span id="VALbits8"><span class="keyword">val</span> bits8</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int</code></pre><div class="info ">
+<pre><span id="VALfloat"><span class="keyword">val</span> float</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; float -&gt; float</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">float g x</code> returns a floating-point number evenly distributed
+        between 0.0 and <code class="code">x</code>.  If <code class="code">x</code> is negative, negative numbers
+        between <code class="code">x</code> and 0.0 are returned.  Implemented as <code class="code">uniform g *. x</code>.
+        Consequently, the values <code class="code">0.0</code> and <code class="code">x</code> can be returned
+        (as a result of floating-point rounding), but not if <code class="code">x</code> is
+        <code class="code">1.0</code>, since <code class="code">float g 1.0</code> behaves exactly like <code class="code">uniform g</code>.</p>
+</div>
+</div>
+
+<pre><span id="VALbyte"><span class="keyword">val</span> byte</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; int</code></pre>
+<pre><span id="VALbits8"><span class="keyword">val</span> bits8</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; int</code></pre><div class="info ">
 <div class="info-desc">
 <p>Return an 8-bit integer evenly distributed between 0 and 255.</p>
 </div>
 </div>
 
-<pre><span id="VALbits"><span class="keyword">val</span> bits</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int</code></pre>
-<pre><span id="VALbits30"><span class="keyword">val</span> bits30</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int</code></pre><div class="info ">
+<pre><span id="VALbits"><span class="keyword">val</span> bits</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; int</code></pre>
+<pre><span id="VALbits30"><span class="keyword">val</span> bits30</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; int</code></pre><div class="info ">
 <div class="info-desc">
 <p>Return a 30-bit integer evenly distributed between 0 and 2<sup class="superscript">30</sup>-1
         (that is, 1073741823, or 0x3FFFFFFF).</p>
 </div>
 </div>
 
-<pre><span id="VALint"><span class="keyword">val</span> int</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int -> int</code></pre><div class="info ">
+<pre><span id="VALint"><span class="keyword">val</span> int</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; int -&gt; int</code></pre><div class="info ">
 <div class="info-desc">
 <p><code class="code">int g n</code> returns an integer evenly distributed between 0 included
         and <code class="code">n</code> excluded.  Hence there are <code class="code">n</code> possible return values
@@ -99,14 +111,14 @@
 </div>
 </div>
 
-<pre><span id="VALbits32"><span class="keyword">val</span> bits32</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int32</code></pre><div class="info ">
+<pre><span id="VALbits32"><span class="keyword">val</span> bits32</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; int32</code></pre><div class="info ">
 <div class="info-desc">
 <p>Return a 32-bit integer evenly distributed between
-        <code class="code">Stdlib.Int32.min_int</code> and <code class="code">Stdlib.Int32.max_int</code>.</p>
+         and .</p>
 </div>
 </div>
 
-<pre><span id="VALint32"><span class="keyword">val</span> int32</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int32 -> int32</code></pre><div class="info ">
+<pre><span id="VALint32"><span class="keyword">val</span> int32</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; int32 -&gt; int32</code></pre><div class="info ">
 <div class="info-desc">
 <p><code class="code">int32 g n</code> returns a 32-bit integer evenly distributed between
         0 included and <code class="code">n</code> excluded.  <code class="code">n</code> must be strictly positive.</p>
@@ -114,18 +126,18 @@
 <p>Note that <code class="code">int32 Int32.max_int</code> produces numbers between 0 and
         <code class="code">Int32.max_int</code> excluded.  To produce numbers between 0 and
         <code class="code">Int32.max_int</code> included, use
-        <code class="code">Int32.logand (bits32 g) Int64.max_int</code>.</p>
+        <code class="code">Int32.logand (bits32 g) Int32.max_int</code>.</p>
 </div>
 </div>
 
-<pre><span id="VALbits64"><span class="keyword">val</span> bits64</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int64</code></pre><div class="info ">
+<pre><span id="VALbits64"><span class="keyword">val</span> bits64</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; int64</code></pre><div class="info ">
 <div class="info-desc">
 <p>Return a 64-bit integer evenly distributed between
-        <code class="code">Stdlib.Int64.min_int</code> and <code class="code">Stdlib.Int64.max_int</code>.</p>
+         and .</p>
 </div>
 </div>
 
-<pre><span id="VALint64"><span class="keyword">val</span> int64</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int64 -> int64</code></pre><div class="info ">
+<pre><span id="VALint64"><span class="keyword">val</span> int64</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; int64 -&gt; int64</code></pre><div class="info ">
 <div class="info-desc">
 <p><code class="code">int64 g n</code> returns a 64-bit integer evenly distributed between
         0 included and <code class="code">n</code> excluded.  <code class="code">n</code> must be strictly positive.</p>
@@ -137,28 +149,28 @@
 </div>
 </div>
 
-<pre><span id="VALnativebits"><span class="keyword">val</span> nativebits</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> nativeint</code></pre><div class="info ">
+<pre><span id="VALnativebits"><span class="keyword">val</span> nativebits</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; nativeint</code></pre><div class="info ">
 <div class="info-desc">
 <p><code class="code">nativebits g</code> returns a platform-native integer (32 or 64
-        bits) evenly distributed between <code class="code">Stdlib.Nativeint.min_int</code> and
-        <code class="code">Stdlib.Nativeint.max_int</code>.</p>
+        bits) evenly distributed between  and
+        .</p>
 </div>
 </div>
 
-<pre><span id="VALnativeint"><span class="keyword">val</span> nativeint</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> nativeint -> nativeint</code></pre><div class="info ">
+<pre><span id="VALnativeint"><span class="keyword">val</span> nativeint</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; nativeint -&gt; nativeint</code></pre><div class="info ">
 <div class="info-desc">
 <p><code class="code">nativeint g n</code> returns a platform-native integer between
         0 included and <code class="code">n</code> included.  <code class="code">n</code> must be strictly positive.</p>
 </div>
 </div>
 
-<pre><span id="VALchar"><span class="keyword">val</span> char</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> char</code></pre><div class="info ">
+<pre><span id="VALchar"><span class="keyword">val</span> char</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; char</code></pre><div class="info ">
 <div class="info-desc">
 <p>Return a character evenly distributed among <code class="code">'\000' ... '\255'</code>.</p>
 </div>
 </div>
 
-<pre><span id="VALbytes"><span class="keyword">val</span> bytes</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> bytes -> int -> int -> unit</code></pre><div class="info ">
+<pre><span id="VALbytes"><span class="keyword">val</span> bytes</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; bytes -&gt; int -&gt; int -&gt; unit</code></pre><div class="info ">
 <div class="info-desc">
 <p><code class="code">bytes g b ofs len</code> produces <code class="code">len</code> bytes of pseudo-random data
       and stores them in byte sequence <code class="code">b</code> at offsets <code class="code">ofs</code> to <code class="code">ofs+len-1</code>.</p>
@@ -168,7 +180,7 @@
 </div>
 </div>
 <h4 id="3_Splittingandcopying">Splitting and copying</h4>
-<pre><span id="VALsplit"><span class="keyword">val</span> split</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
+<pre><span id="VALsplit"><span class="keyword">val</span> split</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
 <div class="info-desc">
 <p><code class="code">split g</code> returns a fresh generator <code class="code">g'</code> that is statistically
         independent from the current generator <code class="code">g</code>.  The two generators
@@ -178,14 +190,14 @@
 </div>
 </div>
 
-<pre><span id="VALcopy"><span class="keyword">val</span> copy</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
+<pre><span id="VALcopy"><span class="keyword">val</span> copy</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; <a href="PRNG.STATE.html#TYPEt">t</a></code></pre><div class="info ">
 <div class="info-desc">
 <p><code class="code">copy g</code> returns a generator <code class="code">g'</code> that has the same state as <code class="code">g</code>.
         The two generators <code class="code">g</code> and <code class="code">g'</code> produce the same data.</p>
 </div>
 </div>
 <h4 id="3_Reseeding">Reseeding</h4>
-<pre><span id="VALreseed"><span class="keyword">val</span> reseed</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> string -> unit</code></pre><div class="info ">
+<pre><span id="VALreseed"><span class="keyword">val</span> reseed</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; string -&gt; unit</code></pre><div class="info ">
 <div class="info-desc">
 <p><code class="code">reseed g s</code> reinitializes the generator <code class="code">g</code> with fresh seed data
         from string <code class="code">s</code>.  This is like <code class="code">seed s</code> except that the existing
@@ -197,7 +209,7 @@
 </div>
 </div>
 
-<pre><span id="VALremake"><span class="keyword">val</span> remake</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -> int array -> unit</code></pre><div class="info ">
+<pre><span id="VALremake"><span class="keyword">val</span> remake</span> : <code class="type"><a href="PRNG.STATE.html#TYPEt">t</a> -&gt; int array -&gt; unit</code></pre><div class="info ">
 <div class="info-desc">
 <p><code class="code">remake g a</code> reinitializes the generator <code class="code">g</code> with fresh seed data
         from array <code class="code">a</code>.  This is like <code class="code">reseed</code> except that the seed is

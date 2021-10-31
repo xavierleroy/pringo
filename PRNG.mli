@@ -220,6 +220,7 @@ module Splitmix: sig
   module State: STATE
   module Pure: PURE
 end
+
   (** This is an implementation of the [STATE] and [PURE] interfaces
       based on the Splitmix design by Guy L. Steele Jr., Doug Lea, and
       Christine H. Flood.  
@@ -252,6 +253,7 @@ module LXM: sig
   module State: STATE
   module Pure: PURE
 end
+
   (** This is an implementation of the [STATE] and [PURE] interfaces
       based on the LXM design by Guy L. Steele Jr, and Sebastiano Vigna.
       We use the L64X128 variant from Fig. 1 of their OOPSLA 2021 paper.
