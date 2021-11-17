@@ -23,6 +23,10 @@ module type TEST = sig
   val gen_blocks: int -> unit
   val treesplits: int -> unit
   val laggedsplit: int -> unit
+  val split_l: unit -> unit
+  val split_r: unit -> unit
+  val split_a: unit -> unit
+  val split_s: unit -> unit
 end
 
 module Maketest (R: PRNG.STATE) : TEST = struct
@@ -96,6 +100,91 @@ let laggedsplit n =
     lag g'
   in lag (init())
 
+(* Split sequence "S_L".  Split, generate number with "left" generator, then
+   recurse using "right" generator.
+
+   This and the following "split sequences" are defined in sections 5.5 and 5.6
+   of:
+
+   Hans Georg Schaathun. 2015. Evaluation of splittable pseudo-random
+   generators. Journal of Functional Programming, Vol. 25.
+   https://doi.org/10.1017/S095679681500012X
+
+     split
+     /  \
+   (1)   …
+
+ *)
+
+let split_l () =
+  let rec spl g =
+    let gR = R.split g in (* now gL = g *)
+    out32 g; (* 1 *)
+    spl gR
+  in spl (init())
+
+(* Split sequence "S_R".  Split, generate number with "right" generator, then
+   recurse using "left" generator.
+
+     split
+     /  \
+    …   (1)
+
+ *)
+
+let split_r () =
+  let rec spl g =
+    let gR = R.split g in (* now gL = g *)
+    out32 gR; (* 1 *)
+    spl g
+  in spl (init())
+
+(* Split sequence "S_A".  Split, generate number with "right" generator, then
+   split again, generate number with "left" generator, and recurse with "right"
+   generator.
+
+     split
+     /  \
+   split (1)
+   /  \
+ (2)   …
+
+ *)
+
+let split_a () =
+  let rec spl g =
+    let gR = R.split g in
+    out32 gR; (* 1 *)
+    let gLR = R.split g in
+    out32 g;  (* 2 *)
+    spl gLR
+  in spl (init())
+
+(* Split sequence "S".
+
+          split
+         /     \
+       …      split
+             /     \
+        split      split
+        /  \       /  \
+      (1)  (2)   (3)  (4)
+
+ *)
+
+let split_s () =
+  let rec spl g =
+    let gR = R.split g in     (* now gL   = g *)
+    let gRR = R.split gR in   (* now gRL  = gR *)
+    let gRRR = R.split gRR in (* now gRRL = gRR *)
+    let gRLR = R.split gR in  (* now gRLL = gR *)
+    out32 gR;   (* 1 *)
+    out32 gRLR; (* 2 *)
+    out32 gRR;  (* 3 *)
+    out32 gRRR; (* 4 *)
+    spl g
+  in spl (init())
+
 end
 
 module T1 = Maketest(PRNG.Splitmix.State)
@@ -116,6 +205,14 @@ let treesplits n =
   let module T = (val !dut) in T.treesplits n
 let laggedsplit n =
   let module T = (val !dut) in T.laggedsplit n
+let split_l () =
+  let module T = (val !dut) in T.split_l()
+let split_r () =
+  let module T = (val !dut) in T.split_r()
+let split_a () =
+  let module T = (val !dut) in T.split_a()
+let split_s () =
+  let module T = (val !dut) in T.split_s()
 
 let run_config s =
   let l =
@@ -131,6 +228,10 @@ let run_config s =
   | ["block"; n] -> gen_blocks (int_of_string n)
   | ["treesplit"; n] -> treesplits (int_of_string n)
   | ["laggedsplit"; n] -> laggedsplit (int_of_string n)
+  | ["splitl"] -> split_l()
+  | ["splitr"] -> split_r()
+  | ["splita"] -> split_a()
+  | ["splits"] -> split_s()
   | _ -> raise (Arg.Bad ("unknown configuration " ^ s))
 
 let _ =
@@ -154,7 +255,15 @@ let _ =
     "-treesplit", Int treesplits,
       " <n>  Perform 2^n splits then round robin between them";
     "-laggedsplit", Int laggedsplit,
-      " <n>  Split, produce n 32-bit numbers, then use the split"
+      " <n>  Split, produce n 32-bit numbers, then use the split";
+    "-splitl", Unit split_l,
+      " Produce 'split sequence' S_L";
+    "-splitr", Unit split_r,
+      " Produce 'split sequence' S_R";
+    "-splita", Unit split_a,
+      " Produce 'split sequence' S_A";
+    "-splits", Unit split_s,
+      " Produce 'split sequence' S"
   ]
   run_config
   "Usage: ./generator <options> [config] | dieharder -a -g 200.\nOptions are:")
