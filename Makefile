@@ -14,6 +14,11 @@ all: PRNG.cmxa PRNG.cma
 PRNG.cmxa PRNG.cma: PRNG.cmx PRNG.cmo stubs.$(O)
 	$(OCAMLMKLIB) -o PRNG PRNG.cmo PRNG.cmx stubs.$(O)
 
+test/u01.exe: test/u01.ml PRNG.cmxa
+	ocamlfind ocamlopt -package testu01 -linkpkg $(OCAMLFLAGS) -I . \
+          -o test/u01.exe \
+          PRNG.cmxa test/u01.ml
+
 %.cmx: %.ml
 	$(OCAMLOPT) -c $*.ml
 %.cmo: %.ml
@@ -39,34 +44,58 @@ install:
 uninstall:
 	$(OCAMLFIND) remove pringo
 
-testresults/dh-%.log: test/generator.exe testresults
+testresults/us-%.log: test/u01.exe
+	@mkdir -p testresults
+	./test/u01.exe -small $* > $@
+
+testresults/um-%.log: test/u01.exe
+	@mkdir -p testresults
+	./test/u01.exe -medium $* > $@
+
+testresults/ub-%.log: test/u01.exe
+	@mkdir -p testresults
+	./test/u01.exe -big $* > $@
+
+testresults/ur-%.log: test/u01.exe
+	@mkdir -p testresults
+	./test/u01.exe -rabbit $* > $@
+
+testresults/ua-%.log: test/u01.exe
+	@mkdir -p testresults
+	./test/u01.exe -alphabit $* > $@
+
+testresults/dh-%.log: test/generator.exe
+	@mkdir -p testresults
 	./test/generator.exe $* | $(DIEHARDER) > $@
 
-testresults/ent-%.log: test/generator.exe testresults
+testresults/ent-%.log: test/generator.exe
+	@mkdir -p testresults
 	./test/generator.exe $* | $(ENT) > $@
 
 clean::
 	rm -rf testresults
 
-testresults:
-	mkdir testresults
+TESTS=float seq8 seq32 seq64 block-13 \
+  treesplit-1 treesplit-4 laggedsplit-3 splita splits
 
-TESTS=seq8 seq32 seq64 block-13 \
-  treesplit-1 treesplit-4 laggedsplit-3 splits
+ALLTESTS=$(TESTS:%=chacha-%) $(TESTS:%=splitmix-%) $(TESTS:%=lxm-%)
 
-ALLTESTS=$(TESTS:%=splitmix-%) $(TESTS:%=chacha-%) $(TESTS:%=lxm-%)
-
-SMALLTESTS=$(ALLTESTS:%=testresults/ent-%.log)
+SMALLTESTS=$(ALLTESTS:%=testresults/us-%.log)
 
 smalltest: $(SMALLTESTS)
-	@grep 'would exceed' $(SMALLTESTS) | sed -e 's/would exceed this value//'
+	@test/reporting $(SMALLTESTS)
 
-FULLTESTS=$(ALLTESTS:%=testresults/dh-%.log)
+FULLTESTS=$(ALLTESTS:%=testresults/um-%.log) \
+          $(ALLTESTS:%=testresults/ur-%.log) \
+          $(ALLTESTS:%=testresults/ua-%.log)
 
 fulltest: $(FULLTESTS)
-	@printf "PASSED: "; cat $(FULLTESTS) | grep -c PASSED
-	@printf "WEAK: "; cat $(FULLTESTS) | grep -c WEAK
-	@if grep FAIL $(FULLTESTS); then exit 2; else exit 0; fi
+	@test/reporting $(FULLTESTS)
+
+HUGETESTS=$(ALLTESTS:%=testresults/ub-%.log)
+
+hugetest: $(HUGETESTS)
+	@test/reporting $(HUGETESTS)
 
 consistencytest: test/consistency.exe
 	./test/consistency.exe
