@@ -13,7 +13,7 @@ Three PRNGS are provided:
 * `Chacha`, which is based on the [Chacha stream cipher](https://cr.yp.to/chacha.html) by D. J. Bernstein. Splitting is implemented by pseudorandomly generating a 128-bit initial state for the new PRNG using the current PRNG.
 * `LXM`, as described in the paper [LXM: Better Splittable Pseudorandom Number Generators (and Almost as Fast)](https://doi.org/10.1145/3485525) by Guy L. Steele Jr. and Sebastiano Vigna, published in the proceedings of OOPSLA 2021.  We use the L64X128 variant.
 
-All PRNGs pass the [Dieharder](http://webhome.phy.duke.edu/~rgb/General/dieharder.php) statistical randomness test.
+All PRNGs pass the [TestU01](http://simul.iro.umontreal.ca/testu01/tu01.html) and [Dieharder](http://webhome.phy.duke.edu/~rgb/General/dieharder.php) statistical randomness tests.
 
 On 64-bit architectures, `Splitmix` is the fastest, closely followed by LXM.  Both are slightly faster than OCaml's `Random` standard library implementation.
 
@@ -38,6 +38,13 @@ To use the library, use `ocamlfind` and select the `pringo` package, e.g.
 
 Documentation is available [online](https://xavierleroy.org/pringo/PRNG.html)
 and as comments in the interface `PRNG.mli`.
+
+## Testing
+
+The `testu01` OPAM package must be installed.  
+- `make -jN smalltest` runs the "small crush" battery of tests.  It takes a few minutes with N=8.
+- `make -jN fulltest` runs the "crush", "rabbit", and "alphabit" batteries of tests.  It takes a few hours with N=8.
+- `make -jN hugetest` runs the "big crush" battery.  It takes on the order of one full day with N=8.
 
 ## Copyright and license
 

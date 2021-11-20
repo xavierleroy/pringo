@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if grep '^ *[0-9].* eps' "$@"
+then exitcode=2
+else exitcode=0
+fi
+printf "PASSED: "
+cat "$@" | grep -c 'All tests were passed'
+printf "WEAK: "
+cat "$@" | grep -c 'The following tests gave p-values outside'
+exit $exitcode
