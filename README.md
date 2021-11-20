@@ -11,11 +11,11 @@ Compared with the pseudo-random number generators provided by the `Random` modul
 Three PRNGS are provided:
 * `Splitmix`, as described in the paper [_Fast Splittable Pseudorandom Number Generators_](http://gee.cs.oswego.edu/dl/papers/oopsla14.pdf) by Guy L. Steele Jr., Doug Lea, and Christine H. Flood, published in the proceedings of OOPSLA 2014.
 * `Chacha`, which is based on the [Chacha stream cipher](https://cr.yp.to/chacha.html) by D. J. Bernstein. Splitting is implemented by pseudorandomly generating a 128-bit initial state for the new PRNG using the current PRNG.
-* `LXM`, as described in the paper [LXM: Better Splittable Pseudorandom Number Generators (and Almost as Fast)](https://doi.org/10.1145/3485525) by Guy L. Steele Jr. and Sebastiano Vigna, published in the proceedings of OOPSLA 2021.  We use the L64X128 variant.
+* `LXM`, as described in the paper [_LXM: Better Splittable Pseudorandom Number Generators (and Almost as Fast)_](https://doi.org/10.1145/3485525) by Guy L. Steele Jr. and Sebastiano Vigna, published in the proceedings of OOPSLA 2021.  We use the L64X128 variant.
 
 All PRNGs pass the [TestU01](http://simul.iro.umontreal.ca/testu01/tu01.html) and [Dieharder](http://webhome.phy.duke.edu/~rgb/General/dieharder.php) statistical randomness tests.
 
-On 64-bit architectures, `Splitmix` is the fastest, closely followed by LXM.  Both are slightly faster than OCaml's `Random` standard library implementation.
+On 64-bit architectures, `Splitmix` is the fastest, closely followed by `LXM`.  Both are slightly faster than OCaml's `Random` standard library implementation.
 
 On 32-bit architectures, `Chacha` is the faster of the three, a bit slower than OCaml's `Random` module.
 
