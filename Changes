@@ -1,3 +1,9 @@
+Release 1.3, 2021-11-22
+- Add `uniform` function producing a random float in (0.0, 1.0) (#4)
+- Add the LXM generator (the L64X128 variant)
+- New test infrastructure based on TestU01
+- Add Schaathun's "split sequences" to the tests (#5)
+
 Release 1.2, 2021-09-13
 - #3: unbox the argument of the mix30 C stub
 - Install .cmti and .mli files for documentation

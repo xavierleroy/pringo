@@ -15,7 +15,7 @@ PRNG.cmxa PRNG.cma: PRNG.cmx PRNG.cmo stubs.$(O)
 	$(OCAMLMKLIB) -o PRNG PRNG.cmo PRNG.cmx stubs.$(O)
 
 test/u01.exe: test/u01.ml PRNG.cmxa
-	ocamlfind ocamlopt -package testu01 -linkpkg $(OCAMLFLAGS) -I . \
+	$(OCAMLFIND) ocamlopt -package testu01 -linkpkg $(OCAMLFLAGS) -I . \
           -o test/u01.exe \
           PRNG.cmxa test/u01.ml
 
