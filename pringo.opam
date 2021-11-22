@@ -11,7 +11,9 @@ bug-reports: "https://github.com/xavierleroy/pringo/issues"
 depends: [
   "ocaml" {>= "4.05.0"}
   "ocamlfind"
+  "testu01" {with-test}
 ]
 build: make
 install: [make "install"]
+test: [make "smalltest"]
 dev-repo: "git+https://https://github.com/xavierleroy/pringo"
