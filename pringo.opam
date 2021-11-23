@@ -15,5 +15,5 @@ depends: [
 ]
 build: make
 install: [make "install"]
-run-test: [make "smalltest"]
+run-test: [make "smalltest"] {ocaml:version >= "4.08"}
 dev-repo: "git+https://https://github.com/xavierleroy/pringo"
