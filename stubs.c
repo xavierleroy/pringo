@@ -320,9 +320,10 @@ CAMLprim value pringo_LXM_next(value v)
 
 CAMLprim value pringo_LXM_copy(value v)
 {
+  CAMLparam1(v);
   value res = caml_alloc_small(Wsizeof(struct LXM_state), Abstract_tag);
   memcpy(LXM_val(res), LXM_val(v), sizeof(struct LXM_state));
-  return res;
+  CAMLreturn(res);
 }
 
 CAMLprim value pringo_LXM_assign(value vdst, value vsrc)
