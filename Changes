@@ -1,3 +1,6 @@
+Release 1.4, 2024-03-28
+- Fix GC root registration in the pure LXM implementation (#6)
+
 Release 1.3, 2021-11-22
 - Add `uniform` function producing a random float in (0.0, 1.0) (#4)
 - Add the LXM generator (the L64X128 variant)
