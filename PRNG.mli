@@ -42,7 +42,7 @@ module type STATE = sig
         as a character string.  The length and randomness of the seed
         limit the total entropy of the generator.  For example, 64
         bits of entropy can be obtained by giving a seed consisting of
-        8 cryptographically-strong random characters (as obtained
+        8 cryptographically-strong random characters, as obtained
         e.g. by reading [/dev/random]. *)
   val make: int array -> t
     (** Initialize a generator from the given seed.  The seed is given
@@ -155,7 +155,7 @@ module type STATE = sig
         It is good practice to reseed a PRNG after a certain quantity
         of pseudo-random data has been produced from it: typically
         2{^32} numbers for the {!PRNG.Splitmix} generator and
-        2{^64} bytes for then {!PRNG.Chacha} generator. *)
+        2{^64} bytes for the {!PRNG.Chacha} generator. *)
   val remake: t -> int array -> unit
     (** [remake g a] reinitializes the generator [g] with fresh seed data
         from array [a].  This is like [reseed] except that the seed is
